@@ -46,6 +46,24 @@
     #hud b { color: #ffd95e; }              /* 数值高亮 */
     #hudRow1 { display: flex; justify-content: space-between; gap: 20px; }
 
+    /* HUD 表头 + 折叠按钮 */
+    #hudHead { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    #hudHead .t { color: #ffd95e; letter-spacing: 1px; }
+    #hudToggle {
+        pointer-events: auto;              /* HUD 整体不拦截鼠标，仅按钮可点 */
+        cursor: pointer;
+        background: rgba(16,12,6,0.8);
+        color: #ffd95e;
+        border: 1px solid #7a5a2e;
+        font-size: 13px;
+        line-height: 1;
+        padding: 1px 6px;
+        border-radius: 3px;
+    }
+    #hudToggle:hover { background: #55401e; }
+    #hud.collapsed #hudBody { display: none; }
+    #hud.collapsed { padding: 4px 8px; min-width: 96px; }   /* 收起时面板更紧凑 */
+
     /* 经验进度条 */
     #xpWrap {
         margin-top: 6px;
@@ -477,6 +495,123 @@
     #eqMsg { min-height: 16px; text-align: center; font-size: 12px; color: #7fbf7f; margin-top: 6px; }
     #eqMsg.err { color: #ff9d7f; }
     #eqInvList .empty { color: #8a7a60; text-align: center; padding: 12px; font-size: 13px; }
+
+    /* ============ 卡池 / 抽卡面板 ============ */
+    #gachaPanel {
+        position: absolute;
+        inset: 0;
+        z-index: 51;                     /* 最高层，覆盖存档与背包面板 */
+        display: none;
+        justify-content: center;
+        align-items: center;
+        background: rgba(10, 6, 14, 0.92);
+    }
+    #gachaBox {
+        width: 440px;
+        background: #221a18;
+        border: 4px solid #8a6a3a;
+        padding: 18px 24px;
+        max-height: 92%;
+        overflow: auto;
+        text-align: center;
+    }
+    #gachaTitle { font-size: 20px; color: #ffd95e; letter-spacing: 3px; margin-bottom: 6px; }
+    #gachaPullsBar { font-size: 14px; color: #e0d0b0; margin: 4px 0 10px; }
+    #gachaPulls { color: #ffd95e; font-size: 18px; }
+    #gachaPool { display: flex; flex-direction: column; gap: 5px; margin: 8px 0 14px; }
+    .gachaItem {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 11px;
+        background: rgba(0,0,0,.3);
+        border: 1px solid #3a2c1a;
+        border-radius: 3px;
+        font-size: 13px;
+    }
+    .rar-common { color: #c8c8c8; border-left: 4px solid #9a9a9a; }
+    .rar-rare   { color: #5aa0ff; border-left: 4px solid #2a6ad0; }
+    .rar-epic   { color: #b17be0; border-left: 4px solid #7a4ac0; }
+    .rar-legend { color: #ffb34d; border-left: 4px solid #ff8c00; }
+    .gachaPct { color: #8a7a60; font-size: 11px; }
+    /* ============ 定轨 / 命定值 ============ */
+    #gachaEpitomize {
+        margin: 0 0 12px;
+        padding: 9px 12px;
+        background: rgba(40,20,40,.55);
+        border: 1px solid #6a3a5a;
+        border-radius: 4px;
+        text-align: left;
+        font-size: 13px;
+    }
+    #epitTitle { color: #ffd95e; font-size: 14px; margin-bottom: 6px; letter-spacing: 1px; }
+    #fatePoints { color: #ffb34d; font-size: 15px; }
+    #fateMeter { font-size: 14px; letter-spacing: 4px; margin: 4px 0 8px; color: #5a4a3a; }
+    #fateMeter .on { color: #ffb34d; text-shadow: 0 0 6px #ff8c00; }
+    #epitTargets { display: flex; gap: 8px; flex-wrap: wrap; }
+    .epitBtn {
+        font-family: inherit;
+        font-size: 12px;
+        padding: 5px 10px;
+        background: #2a1a2a;
+        color: #d8c8e0;
+        border: 2px solid #5a3a5a;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    .epitBtn:hover { background: #4a2a4a; }
+    .epitBtn.active {
+        background: #6a3a5a;
+        color: #ffd95e;
+        border-color: #ffb34d;
+        box-shadow: 0 0 8px rgba(255,140,0,.5);
+    }
+    .epitTip { font-size: 11px; color: #9a7a8a; margin-top: 6px; line-height: 1.5; }
+    #gachaBtns { display: flex; gap: 10px; justify-content: center; margin: 6px 0 10px; }
+    #gachaBtns button {
+        font-family: inherit;
+        font-size: 14px;
+        padding: 7px 18px;
+        background: #4a2a1a;
+        color: #ffd95e;
+        border: 2px solid #8a5a2e;
+        cursor: pointer;
+    }
+    #gachaBtns button:hover:not(:disabled) { background: #6a3a2a; }
+    #gachaBtns button:disabled { opacity: .45; cursor: not-allowed; }
+    #gachaResult {
+        min-height: 38px;
+        font-size: 15px;
+        font-weight: bold;
+        color: #ffd95e;
+        margin: 4px 0 8px;
+    }
+    #gachaResult.pull-new { animation: pullReveal .6s; }
+    @keyframes pullReveal {
+        0% { transform: scale(.4); opacity: 0; }
+        60% { transform: scale(1.15); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    #gachaResult.r-common { color: #c8c8c8; }
+    #gachaResult.r-rare   { color: #5aa0ff; }
+    #gachaResult.r-epic   { color: #b17be0; }
+    #gachaResult.r-legend { color: #ffb34d; }
+    /* 抽中限定装备时的金色橙红发光 */
+    #gachaResult.pulled-limited {
+        text-shadow: 0 0 8px #ff6b4a, 0 0 20px #ff8c00;
+        color: #fff0c0;
+    }
+    #btnCloseGacha {
+        font-family: inherit;
+        font-size: 13px;
+        padding: 6px 20px;
+        margin-top: 6px;
+        background: #3a2c1a;
+        color: #e0d0b0;
+        border: 2px solid #6a4a30;
+        cursor: pointer;
+    }
+    #btnCloseGacha:hover { background: #4a3c2a; color: #fff; }
 </style>
 </head>
 <body>
@@ -490,19 +625,26 @@
 
     <!-- 左上角 HUD：等级 / HP / 攻击力 / 经验条 -->
     <div id="hud">
-        <div id="hudRow1">
-            <span>等级 <b id="hudLv">1</b></span>
-            <span>攻击 <b id="hudAtk">10</b></span>
+        <div id="hudHead">
+            <span class="t">⚔ 勇者面板</span>
+            <button id="hudToggle" title="收起 / 展开">−</button>
         </div>
-        <div>HP <b id="hudHp">100</b>/<b id="hudMaxHp">100</b></div>
-        <div>MP <b id="hudMp">50</b>/<b id="hudMaxMp">50</b> <span id="hudCd" style="color:#ff9d5e"></span> ⚡<b id="hudEnergy">0</b></div>
-        <div id="hudEquip" style="color:#c8b8d8; font-size:12px"></div>
-        <div id="saveTip" style="color:#7fbf7f; font-size:11px; opacity:0; transition:opacity .4s">已自动保存</div>
-        <div id="xpWrap">
-            <div id="xpBar"></div>
-            <div id="xpText"></div>
+        <div id="hudBody">
+            <div id="hudRow1">
+                <span>等级 <b id="hudLv">1</b></span>
+                <span>攻击 <b id="hudAtk">10</b></span>
+            </div>
+            <div>HP <b id="hudHp">100</b>/<b id="hudMaxHp">100</b></div>
+            <div>MP <b id="hudMp">50</b>/<b id="hudMaxMp">50</b> <span id="hudCd" style="color:#ff9d5e"></span> ⚡<b id="hudEnergy">0</b></div>
+                <div>🎟 抽数 <b id="hudPulls">0</b></div>
+            <div id="hudEquip" style="color:#c8b8d8; font-size:12px"></div>
+            <div id="saveTip" style="color:#7fbf7f; font-size:11px; opacity:0; transition:opacity .4s">已自动保存</div>
+            <div id="xpWrap">
+                <div id="xpBar"></div>
+                <div id="xpText"></div>
+            </div>
+            <div id="pickupMsg"></div>
         </div>
-        <div id="pickupMsg"></div>
     </div>
 
     <!-- 回合制战斗面板 -->
@@ -554,13 +696,14 @@
                 <div class="ctrlRow"><span class="key">空格</span><span class="desc">回合制战斗</span></div>
                 <div class="ctrlRow"><span class="key">破盾/大招</span><span class="desc">打空敌人韧性破盾眩晕 · 战斗内攒能量放🔥大招</span></div>
                 <div class="ctrlRow"><span class="key">Q</span><span class="desc">火球术（10MP / 30伤 / 3s冷却）</span></div>
+                <div class="ctrlRow"><span class="key">K</span><span class="desc">卡池抽取（打怪掉落抽数🎟）</span></div>
+                <div class="ctrlRow"><span class="key">I / L</span><span class="desc">装备背包 / 存取档</span></div>
                 <div class="ctrlRow"><span class="key">Enter</span><span class="desc">紫色传送门进洞穴 / 绿色门返回</span></div>
-                <div class="ctrlRow"><span class="key">I</span><span class="desc">装备与背包</span></div>
                 <div class="ctrlRow"><span class="key">R</span><span class="desc">重新开始</span></div>
             </div>
 
             <!-- 玩法说明 -->
-            <div id="startGoal">击败史莱姆与洞穴蝙蝠获取经验升级，挑战紫色史莱姆王通关！</div>
+            <div id="startGoal">开放世界自由冒险：史莱姆与洞穴蝙蝠会不断刷新，击败它们积累经验、装备与抽数🎟；偶尔出没的紫色史莱姆王是可选精英，击杀有丰厚奖励！</div>
 
             <!-- 开始按钮 -->
             <button id="btnStart">开始冒险</button>
@@ -624,6 +767,26 @@
             <button id="btnCloseEq">关闭</button>
         </div>
     </div>
+
+    <!-- 卡池 / 抽卡面板 -->
+    <div id="gachaPanel">
+        <div id="gachaBox">
+            <div id="gachaTitle">🎟 寻宝卡池 <small style="font-size:11px;color:#a09080">（ 按 K 呼出 ）</small></div>
+            <div id="gachaPullsBar">可用抽数：<b id="gachaPulls">0</b> 🎟</div>
+            <div id="gachaEpitomize">
+                <div id="epitTitle">🎯 定轨（命定值 <span id="fatePoints">0</span>/2）</div>
+                <div id="fateMeter"></div>
+                <div id="epitTargets"></div>
+                <div class="epitTip">选定 1 把传说武器作为定轨目标。抽中非目标的传说 → 命定值 +1；满 2 点后下次传说必出目标。抽中目标或更换定轨会清零。</div>
+            </div>
+            <div id="gachaPool"></div>
+            <div id="gachaBtns">
+                <button id="btnPull1">抽取 ✕1</button>
+            </div>
+            <div id="gachaResult">点击抽取，试试手气！击败怪物可获得抽数。</div>
+            <button id="btnCloseGacha">关闭</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -634,22 +797,32 @@ const canvas    = document.getElementById('game');
 const ctx       = canvas.getContext('2d');
 const PIX       = 32;                 // 单格像素大小（复古格子感）
 
-const MAP_W     = 25;                 // 地图横向格子数 (25*32=800)
-const MAP_H     = 19;                 // 地图纵向格子数 (~19*32=608)
 const tile      = 32;
 
-// 用二维数组记录地图：0=空地 1=树 2=石头
-let map = [];
-// 当前所在的地图：'grass' 地面世界 / 'cave' 黑暗洞穴
+// 摄像机：世界坐标 - 摄像机 = 屏幕坐标（只渲染玩家所在区域）
+let cam = { x: 0, y: 0 };
+
+// 开放世界地标：世界中心原点(0,0)是出生区，越往外怪越强
+const GATE_WORLD = { gx: 7,  gy: 6 };    // 地面洞穴入口（紫色传送门）
+const CAVE_SPAWN = { gx: 0,  gy: 0 };    // 洞穴出生点
+const GATE_CAVE  = { gx: 8,  gy: 8 };    // 洞穴返回地面的绿色出口
+
+// 当前所在地图：'grass' 地面世界 / 'cave' 黑暗洞穴
 let currentMap = 'grass';
 
 // 玩家对象
 let player = {
-    x: 12 * PIX, y: 12 * PIX,          // 出生位置（中下方，避开 HUD）
+    x: 0, y: 0,                         // 出生在开放世界中心原点的安全区
     lv: 1,
     hp: 100, maxHp: 100,
     mp: 50, maxMp: 50,               // 法力值（火球术消耗）
     energy: 0,                       // 大招能量（战斗中普攻/受击积攒，满 100 可放大招）
+    pulls: 0,                        // 抽数（击败怪物掉落，用于卡池抽取）
+    pityTotal: 0,                    // 传说保底计数（原神式：累计抽数，满 60 出传说）
+    pity4: 0,                        // 史诗/更高保底计数（每 10 抽必出一件 4星级）
+    gachaGuarantee: false,           // 大保底：上次传说歪了非UP → 下次传说必出UP
+    fateTarget: 'sword_star',        // 定轨目标（命定值机制指向的传说装备）
+    fatePoints: 0,                   // 命定值：抽中非目标传说 +1，满2点下次传说必出目标
     atk: 10,
     xp: 0, xpNeed: 100,              // 升级所需经验
     dirX: 1, dirY: 0,                // 面向方向（决定火球术方向）
@@ -666,6 +839,13 @@ const ITEMS = {
     hero_sword:    { type: 'weapon', name: '勇者之剑', stat: 12, desc: '攻击 +12' },
     leather_armor: { type: 'armor',  name: '皮甲',     stat: 15, desc: '最大HP +15' },
     crystal_armor: { type: 'armor',  name: '水晶战甲', stat: 35, desc: '最大HP +35' },
+    // 卡池专属稀有装备
+    sword_sun:     { type: 'weapon', name: '圣剑·晨曦', stat: 20, desc: '攻击 +20' },
+    armor_mithril: { type: 'armor',  name: '秘银战铠', stat: 60, desc: '最大HP +60' },
+    sword_legend:  { type: 'weapon', name: '传说·光暗之刃', stat: 32, desc: '攻击 +32' },
+    // 卡池限定装备（仅能靠抽卡获得，怪物不掉落）
+    sword_star:    { type: 'weapon', name: '星河之刃', stat: 28, desc: '攻击 +28' },
+    armor_void:    { type: 'armor',  name: '虚空重甲', stat: 80, desc: '最大HP +80' },
 };
 
 // 有效攻击力 = 基础攻击 + 武器加成
@@ -743,11 +923,26 @@ function giveEnemyLoot(type) {
     }
 }
 
+/* 击败怪物掉落"抽数"（用于卡池抽取） */
+function dropPulls(kind) {
+    // 史莱姆 1、蝙蝠 2、Boss 5
+    const n = (kind === 'boss') ? 5 : (kind === 'bat' ? 2 : 1);
+    player.pulls += n;
+    addPickup(kind === 'boss' ? 'Boss 掉落：抽数 +' + n + ' 🎟' : '掉落：抽数 +' + n + ' 🎟');
+    updateHUD(); saveGame();
+}
+
 // 兼容旧存档：缺少装备字段时补齐默认值
 function normalizeEquipment() {
     if (!player.equip) player.equip = { weapon: null, armor: null };
     if (!Array.isArray(player.inventory)) player.inventory = [];
     if (player.energy == null) player.energy = 0;          // 兼容旧档：无大招能量
+    if (player.pulls == null) player.pulls = 0;            // 兼容旧档：无抽数
+    if (player.pityTotal == null) player.pityTotal = 0;    // 兼容旧档：无保底计数
+    if (player.pity4 == null) player.pity4 = 0;
+    if (player.gachaGuarantee == null) player.gachaGuarantee = false;
+    if (player.fateTarget == null) player.fateTarget = 'sword_star';
+    if (player.fatePoints == null) player.fatePoints = 0;
     if (!Array.isArray(slimes)) slimes = [];
 }
 
@@ -783,73 +978,67 @@ const keys = {};
 const VIEW_W = 800, VIEW_H = 600;
 
 /* =========================================================
-   地图生成
-   地面世界 buildGrassMap：草地 + 树木(1) + 石头(2)
-   黑暗洞穴 buildCaveMap：黑色岩地 + 水晶(1) + 岩石(2)
+   开放世界：无边界地图，按网格坐标确定性生成地形
+   worldTile(gx, gy) 返回该格地形：0=空地 1=障碍(树/水晶) 2=障碍(石/岩)
+   只对玩家所在视口区域做渲染与碰撞，因此世界再大也流畅
    ========================================================= */
-function buildGrassMap() {
-    for (let y = 0; y < MAP_H; y++) {
-        map[y] = [];
-        for (let x = 0; x < MAP_W; x++) map[y][x] = 0;
-    }
-    for (let y = 0; y < MAP_H; y++) {
-        for (let x = 0; x < MAP_W; x++) {
-            if ((x >= 1 && x <= 3 && y >= 1 && y <= 3)) continue; // 出生点留空地
-            const r = Math.random();
-            if (r < 0.10) map[y][x] = 1;          // 树
-            else if (r < 0.16) map[y][x] = 2;     // 石
-        }
-    }
-    // 洞穴入口（中心 400,300 所在格）保持空地，便于走近触发
-    map[9][12] = 0;
-    // 玩家出生区(12,12)附近强制清空，避免开局被左上角 HUD 或障碍遮挡
-    for (let yy = 11; yy <= 13; yy++)
-        for (let xx = 11; xx <= 13; xx++) map[yy][xx] = 0;
-    // 四周围墙采用石头，防止走出地图
-    for (let x = 0; x < MAP_W; x++) { map[0][x] = 2; map[MAP_H-1][x] = 2; }
-    for (let y = 0; y < MAP_H; y++) { map[y][0] = 2; map[y][MAP_W-1] = 2; }
+function hash2(gx, gy) {
+    let h = (gx * 374761393 + gy * 668265263) | 0;
+    h = (h ^ (h >> 13)) | 0; h = (h * 1274126177) | 0;
+    return ((h ^ (h >> 16)) >>> 0) / 4294967296;
 }
+function worldTile(gx, gy) {
+    if (currentMap === 'cave') {
+        // 洞穴出生区与返回出口留空
+        if (Math.abs(gx) <= 2 && Math.abs(gy) <= 2) return 0;
+        if (gx === GATE_CAVE.gx && gy === GATE_CAVE.gy) return 0;
+        const r = hash2(gx, gy);
+        if (r < 0.14) return 1;          // 水晶
+        if (r < 0.24) return 2;          // 岩石
+        return 0;
+    }
+    // 地面：出生广场与洞穴入口留空
+    if (Math.abs(gx) <= 3 && Math.abs(gy) <= 3) return 0;
+    if (Math.abs(gx - GATE_WORLD.gx) <= 1 && Math.abs(gy - GATE_WORLD.gy) <= 1) return 0;
+    const r = hash2(gx, gy);
+    if (r < 0.10) return 1;              // 树
+    if (r < 0.16) return 2;              // 石
+    return 0;
+}
+// 开放世界无需预生成地形；保留占位以便地图切换时调用
+function buildGrassMap() {}
+function buildCaveMap() {}
 
-function buildCaveMap() {
-    for (let y = 0; y < MAP_H; y++) {
-        map[y] = [];
-        for (let x = 0; x < MAP_W; x++) map[y][x] = 0;
-    }
-    for (let y = 0; y < MAP_H; y++) {
-        for (let x = 0; x < MAP_W; x++) {
-            if ((x >= 1 && x <= 3 && y >= 1 && y <= 3)) continue; // 入口出生区留空地
-            if (x === 20 && y === 8) continue;                    // 返回地面出口留空地
-            const r = Math.random();
-            if (r < 0.14) map[y][x] = 1;          // 水晶
-            else if (r < 0.24) map[y][x] = 2;     // 岩石
-        }
-    }
-    for (let x = 0; x < MAP_W; x++) { map[0][x] = 2; map[MAP_H-1][x] = 2; }
-    for (let y = 0; y < MAP_H; y++) { map[y][0] = 2; map[y][MAP_W-1] = 2; }
-    // 洞穴出生区(4,9)附近清空，避免一进洞就被 HUD 遮挡或卡在障碍里
-    for (let yy = 8; yy <= 10; yy++)
-        for (let xx = 3; xx <= 5; xx++) map[yy][xx] = 0;
+/* 距世界中心原点的"外层等级"（网格距离）→ 越往外怪越强 */
+function zoneTier(gx, gy) {
+    const d = Math.max(Math.abs(gx), Math.abs(gy));
+    if (d < 4)  return 0;   // 核心区（弱）
+    if (d < 10) return 1;   // 次外层
+    if (d < 18) return 2;   // 外层
+    return 3;               // 深层（极强）
+}
+// 生成一只敌人：血量/韧性随玩家等级与离中心的距离成长
+function makeEnemy(gx, gy, type) {
+    const tier = zoneTier(gx, gy);
+    const baseHp = (type === 'bat') ? 35 : 20;
+    const hp = Math.round(baseHp + (player.lv - 1) * (type === 'bat' ? 6 : 4) + tier * 20 + Math.random() * 8);
+    return {
+        gx, gy, type,
+        hp, maxHp: hp,
+        ai: (type === 'bat') ? 'critter' : rollSlimeAI(),
+        tough: (type === 'bat' ? 6 : 4) + tier * 2,
+        toughMax: (type === 'bat' ? 6 : 4) + tier * 2,
+        tier,
+    };
 }
 
 /* =========================================================
-   生成史莱姆（地面世界普通敌人）
+   生成史莱姆（地面）/ 蝙蝠（洞穴）：在玩家所在区域按难度刷新
    ========================================================= */
 function spawnSlimes(count) {
     slimes = [];
-    let placed = 0, guard = 0;
-    while (placed < count && guard < 1000) {
-        guard++;
-        const gx = 2 + Math.floor(Math.random() * (MAP_W - 4));
-        const gy = 2 + Math.floor(Math.random() * (MAP_H - 4));
-        if (map[gy][gx] !== 0) continue;
-        if (Math.abs(gx - 12) + Math.abs(gy - 12) < 6) continue;  // 离玩家出生点远些
-        // 距洞穴入口(12,9)远一些，避免出生即遇怪
-        if (Math.abs(gx - 12) + Math.abs(gy - 9) < 4) continue;
-        let tooClose = slimes.some(s => Math.abs(s.gx-gx)+Math.abs(s.gy-gy) < 3);
-        if (tooClose) continue;
-        slimes.push({ gx, gy, type: 'slime', hp: 20, maxHp: 20, ai: rollSlimeAI(), tough: 4, toughMax: 4 });
-        placed++;
-    }
+    let g = 0;
+    while (slimes.length < count && g < 2000) { g++; tryPlace('slime'); }
 }
 
 // 史莱姆的行为分化：标准 / 治疗 / 铁壁
@@ -858,23 +1047,43 @@ function rollSlimeAI() {
     return r < 0.55 ? 'normal' : (r < 0.80 ? 'healer' : 'defender');
 }
 
-/* =========================================================
-   生成蝙蝠：洞穴里的更强大敌人（血量更高、伤害更凶）
-   ========================================================= */
 function spawnBats(count) {
     slimes = [];
-    let placed = 0, guard = 0;
-    while (placed < count && guard < 1000) {
-        guard++;
-        const gx = 2 + Math.floor(Math.random() * (MAP_W - 4));
-        const gy = 2 + Math.floor(Math.random() * (MAP_H - 4));
-        if (map[gy][gx] !== 0) continue;
-        if (Math.abs(gx - 4) + Math.abs(gy - 9) < 5) continue;   // 离洞穴出生区远些
-        let tooClose = slimes.some(s => Math.abs(s.gx-gx)+Math.abs(s.gy-gy) < 2);
-        if (tooClose) continue;
-        slimes.push({ gx, gy, type: 'bat', hp: 35, maxHp: 35, ai: 'critter', tough: 6, toughMax: 6 }); // 蝙蝠更抗打、爱暴击
-        placed++;
+    let g = 0;
+    while (slimes.length < count && g < 2000) { g++; tryPlace('bat'); }
+}
+
+// 在玩家周围 ±26 格的范围内找空地放一只怪（不清空现有怪物）
+function tryPlace(type) {
+    const pcx = Math.round(player.x / tile), pcy = Math.round(player.y / tile);
+    const rad = 26;
+    for (let t = 0; t < 220; t++) {
+        const gx = pcx + (Math.floor(Math.random() * (rad * 2 + 1)) - rad);
+        const gy = pcy + (Math.floor(Math.random() * (rad * 2 + 1)) - rad);
+        if (worldTile(gx, gy) !== 0) continue;
+        if (Math.abs(gx * tile - player.x) + Math.abs(gy * tile - player.y) < 96) continue; // 别贴脸
+        if (slimes.some(s => Math.abs(s.gx - gx) + Math.abs(s.gy - gy) < 2)) continue;
+        slimes.push(makeEnemy(gx, gy, type));
+        return true;
     }
+    return false;
+}
+function spawnOne(type) { return tryPlace(type); }
+let respawnTimer = 0;   // 持续刷新的冷却计时
+
+// 持续刷新：补足敌人，清掉远离玩家的旧怪，偶发可选精英
+function replenishWorld() {
+    const pcx = player.x / tile, pcy = player.y / tile;
+    for (let i = slimes.length - 1; i >= 0; i--) {
+        const s = slimes[i];
+        if (Math.hypot(s.gx - pcx, s.gy - pcy) > 40) slimes.splice(i, 1);   // 只活跃在玩家所在区域
+    }
+    if (boss && Math.hypot(boss.gx - pcx, boss.gy - pcy) > 40) boss = null;
+    const target = (currentMap === 'cave') ? 6 : 5;
+    const type   = (currentMap === 'cave') ? 'bat' : 'slime';
+    while (slimes.length < target && spawnOne(type)) {}   // 补足到目标数量
+    // 地面偶发可选精英史莱姆王（可重复挑战，非通关目标）
+    if (currentMap === 'grass' && !boss && Math.random() < 0.075) spawnBoss();
 }
 
 /* =========================================================
@@ -885,23 +1094,23 @@ function nearWorld(x, y) {
     return Math.abs(player.x - x) <= tile && Math.abs(player.y - y) <= tile;
 }
 
-// 进入洞穴：切到黑暗洞穴图，刷新蝙蝠敌人，关闭 Boss
+// 进入洞穴：切到黑暗洞穴，在洞穴出生区刷新蝙蝠
 function enterCave() {
     currentMap = 'cave';
-    boss = null;                            // 洞穴里没有 Boss 关卡
+    boss = null;                            // 洞穴里没有 Boss
     buildCaveMap();
-    spawnBats(6);                           // 洞穴刷新 6 只更强蝙蝠
-    player.x = 4 * PIX; player.y = 9 * PIX; // 出生在洞穴开阔区（避开 HUD）
+    spawnBats(6);                           // 洞穴刷新蝙蝠
+    player.x = CAVE_SPAWN.gx * tile; player.y = CAVE_SPAWN.gy * tile;
     fireball = null; explosion = null;      // 清掉可能存在的飞弹
     saveGame();                             // 切换地图后存档
 }
 
-// 返回地面：回到草地世界，回到洞穴入口坐标(400,300)处
+// 返回地面：回到草地世界，站在地面洞穴入口旁
 function exitCave() {
     currentMap = 'grass';
     buildGrassMap();
     spawnSlimes(5);                         // 地面足量史莱姆
-    player.x = 400; player.y = 300;         // 站在洞穴入口格
+    player.x = GATE_WORLD.gx * tile; player.y = GATE_WORLD.gy * tile;
     fireball = null; explosion = null;
     saveGame();                             // 切换地图后存档
 }
@@ -926,17 +1135,18 @@ function refreshBossHp() {
 }
 
 /* =========================================================
-   生成 Boss：在所有史莱姆被击败后出现，体型更大、更扛打
+   生成可选精英史莱姆王：出现在玩家附近，血量随玩家等级与所在外层等级成长
    ========================================================= */
 function spawnBoss() {
-    // 在地图空地上找一个距玩家较远的位置
+    const pcx = Math.round(player.x / tile), pcy = Math.round(player.y / tile);
+    const tier = zoneTier(pcx, pcy);
     for (let i = 0; i < 500; i++) {
-        const gx = 4 + Math.floor(Math.random() * (MAP_W - 8));
-        const gy = 4 + Math.floor(Math.random() * (MAP_H - 8));
-        if (map[gy][gx] !== 0) continue;
-        if (Math.abs(gx*tile - player.x) + Math.abs(gy*tile - player.y) < 200) continue;
-        const hpScale = bossMaxHp();       // 用动态公式计算初始血量
-        boss = { gx, gy, hp: hpScale, maxHp: hpScale, ai: 'boss', tough: 10, toughMax: 10 };
+        const gx = pcx + (Math.floor(Math.random() * 49) - 24);
+        const gy = pcy + (Math.floor(Math.random() * 49) - 24);
+        if (worldTile(gx, gy) !== 0) continue;
+        if (Math.abs(gx*tile - player.x) + Math.abs(gy*tile - player.y) < 240) continue;
+        const hp = bossMaxHp() + tier * 40;     // 越往外的史莱姆王越强
+        boss = { gx, gy, hp, maxHp: hp, ai: 'boss', tough: 10, toughMax: 10, tier };
         return;
     }
 }
@@ -952,14 +1162,13 @@ function collides(px, py) {
     ];
     for (const [cx, cy] of pts) {
         const gx = Math.floor(cx / PIX), gy = Math.floor(cy / PIX);
-        if (gx < 0 || gy < 0 || gx >= MAP_W || gy >= MAP_H) return true; // 越界即障碍
-        if (map[gy][gx] !== 0) return true;                              // 树/石即障碍
+        if (worldTile(gx, gy) !== 0) return true;              // 树/石即障碍（无限世界无边界）
     }
     return false;
 }
 
 /* =========================================================
-   移动逻辑：WASD，逐格推进并做碰撞检测
+   移动逻辑：WASD，逐格推进并做碰撞检测（无边界，可无限行走）
    ========================================================= */
 function move(dx, dy) {
     if (dx !== 0) {
@@ -968,9 +1177,6 @@ function move(dx, dy) {
     if (dy !== 0) {
         if (!collides(player.x, player.y + dy)) player.y += dy;
     }
-    // 防止走到地图边缘外（双重保险）
-    player.x = Math.max(0, Math.min(MAP_W * PIX - PIX, player.x));
-    player.y = Math.max(0, Math.min(MAP_H * PIX - PIX, player.y));
 }
 
 /* =========================================================
@@ -979,28 +1185,36 @@ function move(dx, dy) {
 function draw() {
     const isCave = (currentMap === 'cave');
 
+    // ---- 0) 摄像机对准玩家中心（世界坐标 -> 屏幕偏移），只绘制视口区域 ----
+    cam.x = player.x + PIX / 2 - VIEW_W / 2;
+    cam.y = player.y + PIX / 2 - VIEW_H / 2;
+    const x0 = Math.floor(cam.x / tile), x1 = Math.ceil((cam.x + VIEW_W) / tile);
+    const y0 = Math.floor(cam.y / tile), y1 = Math.ceil((cam.y + VIEW_H) / tile);
+
     // ---- 1) 背景底色与棋盘网格（洞穴为黑色岩地）----
     const groundA = isCave ? '#2a2a2f' : '#3f8f3f';
     const groundB = isCave ? '#24242a' : '#378437';
     ctx.fillStyle = groundA;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-    for (let y = 0; y < MAP_H; y++) {
-        for (let x = 0; x < MAP_W; x++) {
-            ctx.fillStyle = (x + y) % 2 === 0 ? groundA : groundB;
-            ctx.fillRect(x * tile, y * tile, tile, tile);
+    for (let gy = y0; gy <= y1; gy++) {
+        for (let gx = x0; gx <= x1; gx++) {
+            const X = gx * tile - cam.x, Y = gy * tile - cam.y;
+            ctx.fillStyle = (gx + gy) % 2 === 0 ? groundA : groundB;
+            ctx.fillRect(X, Y, tile, tile);
             // 草地小草丛 / 洞穴岩缝点缀
-            if (map[y][x] === 0 && Math.floor((x*7+y*13)%5) === 0) {
+            if (worldTile(gx, gy) === 0 && Math.floor((gx*7+gy*13) % 5) === 0) {
                 ctx.fillStyle = isCave ? '#1d1d22' : '#2f6f2f';
-                ctx.fillRect(x*tile+8, y*tile+8, 4, 4);
+                ctx.fillRect(X + 8, Y + 8, 4, 4);
             }
         }
     }
 
     // ---- 2) 障碍物（按地图区分外观）----
-    for (let y = 0; y < MAP_H; y++) {
-        for (let x = 0; x < MAP_W; x++) {
-            const X = x * tile, Y = y * tile;
-            if (map[y][x] === 1) {
+    for (let gy = y0; gy <= y1; gy++) {
+        for (let gx = x0; gx <= x1; gx++) {
+            const X = gx * tile - cam.x, Y = gy * tile - cam.y;
+            const t = worldTile(gx, gy);
+            if (t === 1) {
                 if (isCave) {                        // 洞穴水晶矿
                     ctx.fillStyle = '#4a2fae'; ctx.fillRect(X+11, Y+8, 10, 18);
                     ctx.fillStyle = '#7a5aff'; ctx.fillRect(X+11, Y+8, 5, 18);
@@ -1012,7 +1226,7 @@ function draw() {
                     ctx.fillStyle = '#379037'; ctx.beginPath();
                     ctx.arc(X+16, Y+13, 7, 0, Math.PI*2); ctx.fill();
                 }
-            } else if (map[y][x] === 2) {
+            } else if (t === 2) {
                 if (isCave) {                        // 洞穴暗岩
                     ctx.fillStyle = '#53535b'; ctx.fillRect(X+2, Y+4, tile-4, tile-6);
                     ctx.fillStyle = '#63636d'; ctx.fillRect(X+2, Y+4, tile-4, 6);
@@ -1024,66 +1238,70 @@ function draw() {
         }
     }
 
-    // ---- 2.5) 入口/出口标记（传送门）----
-    if (isCave) drawPortal(20*tile+16, 8*tile+16, '#3fbf3f');  // 洞穴的绿色出口
-    else        drawPortal(400, 300, '#7f5aff');               // 地面的紫色洞穴入口
+    // ---- 2.5) 入口/出口传送门 ----
+    if (isCave) drawPortal(GATE_CAVE.gx * tile + 16 - cam.x, GATE_CAVE.gy * tile + 16 - cam.y, '#3fbf3f');
+    else        drawPortal(GATE_WORLD.gx * tile + 16 - cam.x, GATE_WORLD.gy * tile + 16 - cam.y, '#7f5aff');
 
-    // ---- 3) 敌人（按类型绘制：史莱姆 / 蝙蝠）----
+    // ---- 3) 敌人（按类型 + 外层等级着色，越往外越凶）----
     for (const s of slimes) {
-        const X = s.gx * tile, Y = s.gy * tile;
-        if (s.type === 'bat') {                 // 紫红色蝙蝠（翅膀 + 身体）
-            ctx.fillStyle = '#b0308a';
-            ctx.beginPath(); ctx.moveTo(X+16,Y+13); ctx.lineTo(X+8,Y+5); ctx.lineTo(X+13,Y+13); ctx.closePath(); ctx.fill(); // 左翼
-            ctx.beginPath(); ctx.moveTo(X+16,Y+13); ctx.lineTo(X+24,Y+5); ctx.lineTo(X+19,Y+13); ctx.closePath(); ctx.fill(); // 右翼
-            ctx.beginPath(); ctx.arc(X+16, Y+16, 8, 0, Math.PI*2); ctx.fill();       // 身体
-            ctx.fillStyle = '#ffd000'; ctx.fillRect(X+11,Y+14,3,3); ctx.fillRect(X+19,Y+14,3,3); // 眼睛
-        } else {                                // 绿色液滴史莱姆
-            ctx.fillStyle = '#33cc33';
+        const X = s.gx * tile - cam.x, Y = s.gy * tile - cam.y;
+        if (s.type === 'bat') {                 // 蝙蝠（翅膀 + 身体，颜色随外层变深红）
+            ctx.fillStyle = batColor(s.tier || 0);
+            ctx.beginPath(); ctx.moveTo(X+16,Y+13); ctx.lineTo(X+8,Y+5); ctx.lineTo(X+13,Y+13); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(X+16,Y+13); ctx.lineTo(X+24,Y+5); ctx.lineTo(X+19,Y+13); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.arc(X+16, Y+16, 8, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#ffd000'; ctx.fillRect(X+11,Y+14,3,3); ctx.fillRect(X+19,Y+14,3,3);
+        } else {                                // 史莱姆（绿色 → 橙 → 深红 → 紫，随外层加深）
+            ctx.fillStyle = slimeColor(s.tier || 0);
             ctx.beginPath(); ctx.arc(X+16, Y+12, 11, 0, Math.PI*2); ctx.fill();
             ctx.beginPath(); ctx.arc(X+16, Y+20, 11, 0, Math.PI); ctx.fill();
             ctx.fillStyle = '#000'; ctx.fillRect(X+11, Y+13, 4, 4); ctx.fillRect(X+19, Y+13, 4, 4);
             ctx.fillStyle = '#ccffcc'; ctx.beginPath(); ctx.arc(X+12, Y+8, 3, 0, Math.PI*2); ctx.fill();
         }
-        drawEnemySigil(X, Y, s.ai);   // 头上小图标标识 AI 类型
+        if ((s.tier || 0) >= 1) {               // 精英光环：高外层敌人描圈提示
+            ctx.strokeStyle = 'rgba(255,120,20,0.8)'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.arc(X+16, Y+16, 14, 0, Math.PI*2); ctx.stroke();
+        }
+        drawEnemySigil(X, Y, s.ai);             // 头上小图标标识 AI 类型
     }
 
-    // ---- 3.5) Boss（仅地面世界，暗紫色大史莱姆）----
+    // ---- 3.5) 可选精英史莱姆王 ----
     if (boss) {
-        const X = boss.gx * tile, Y = boss.gy * tile;
+        const X = boss.gx * tile - cam.x, Y = boss.gy * tile - cam.y;
         ctx.fillStyle = '#7a33cc';
         ctx.beginPath(); ctx.arc(X+16, Y+10, 15, 0, Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.arc(X+16, Y+22, 15, 0, Math.PI); ctx.fill();
         ctx.fillStyle = '#000'; ctx.fillRect(X+9, Y+11, 5, 5); ctx.fillRect(X+19, Y+11, 5, 5);
         ctx.fillStyle = '#e0c6ff'; ctx.beginPath(); ctx.arc(X+11, Y+6, 4, 0, Math.PI*2); ctx.fill();
-        drawEnemySigil(X, Y, boss.ai);   // Boss 王冠标识
+        drawEnemySigil(X, Y, boss.ai);
     }
 
     // ---- 3.9) 火球术：飞行火球 + 爆炸效果 ----
     if (fireball) {
-        ctx.fillStyle = '#ff6a00';
-        ctx.beginPath(); ctx.arc(fireball.x+6, fireball.y+6, 7, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#ffd000';
-        ctx.beginPath(); ctx.arc(fireball.x+6, fireball.y+6, 3, 0, Math.PI*2); ctx.fill();
+        const fx = fireball.x - cam.x, fy = fireball.y - cam.y;
+        ctx.fillStyle = '#ff6a00'; ctx.beginPath(); ctx.arc(fx+6, fy+6, 7, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#ffd000'; ctx.beginPath(); ctx.arc(fx+6, fy+6, 3, 0, Math.PI*2); ctx.fill();
     }
     if (explosion) {
+        const ex = explosion.x - cam.x, ey = explosion.y - cam.y;
         const r = 70 - (explosion.ttl / 20) * 70;
         const a = explosion.ttl / 20;
         ctx.fillStyle = 'rgba(255,120,20,' + (a * 0.6) + ')';
-        ctx.beginPath(); ctx.arc(explosion.x, explosion.y, Math.max(2, r), 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ex, ey, Math.max(2, r), 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = 'rgba(255,220,80,' + a + ')';
         ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.arc(explosion.x, explosion.y, Math.max(2, r), 0, Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(ex, ey, Math.max(2, r), 0, Math.PI*2); ctx.stroke();
     }
 
     // ---- 4) 玩家（简单小人）----
-    const px = player.x, py = player.y;
+    const px = player.x - cam.x, py = player.y - cam.y;
     ctx.fillStyle = '#1e3a8a'; ctx.fillRect(px+8, py+12, 16, 18);
     ctx.fillStyle = '#f0c090'; ctx.beginPath(); ctx.arc(px+16, py+10, 8, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = '#ffd95e'; ctx.fillRect(px+8, py+4, 16, 4);
 
     // ---- 5) 洞穴黑暗遮罩：以玩家为中心的光圈，营造漆黑氛围 ----
     if (isCave) {
-        const cxp = player.x + 16, cyp = player.y + 16;
+        const cxp = px + 16, cyp = py + 16;
         const grad = ctx.createRadialGradient(cxp, cyp, 60, cxp, cyp, 250);
         grad.addColorStop(0, 'rgba(0,0,0,0)');
         grad.addColorStop(1, 'rgba(0,0,0,0.82)');
@@ -1091,6 +1309,11 @@ function draw() {
         ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     }
 }
+
+// 史莱姆颜色：随外层等级 绿 → 橙 → 深红 → 紫
+function slimeColor(tier) { return ['#33cc33','#e88b2a','#cf2f6a','#8a2fd0'][tier] || '#33cc33'; }
+// 蝙蝠颜色：随外层等级 紫 → 玫红 → 深红 → 亮红
+function batColor(tier)  { return ['#b0308a','#d0446b','#d02727','#ff2a6a'][tier]  || '#b0308a'; }
 
 // 敌人头上 AI 类型小图标（治疗✚ / 铁壁盾牌 / 狂暴闪电 / Boss 王冠）
 function drawEnemySigil(X, Y, ai) {
@@ -1133,6 +1356,7 @@ function updateHUD() {
     document.getElementById('hudMp').textContent = player.mp;
     document.getElementById('hudMaxMp').textContent = player.maxMp;
     document.getElementById('hudEnergy').textContent = Math.min(PLAYER_MAX_ENERGY, player.energy);
+    document.getElementById('hudPulls').textContent = player.pulls;
     // 装备栏显示（武器/防具及加成）
     const w = player.equip && player.equip.weapon;
     const a = player.equip && player.equip.armor;
@@ -1228,6 +1452,7 @@ function enemyBaseDmg(e) {
     let base = 6 + Math.floor(Math.random() * 5);   // 6-10
     if (e === boss) base += 8;                       // Boss 更凶
     else if (e.type === 'bat') base += 4;            // 蝙蝠更强
+    base += (e.tier || 0) * 2;                       // 越往外的怪越疼
     return base;
 }
 /* 暴击/大招时的震屏 + 红色闪光 */
@@ -1251,15 +1476,16 @@ function endBattle(won) {
         if (idx > -1) {
             slimes.splice(idx, 1);          // 地图上移除该史莱姆
             // 更强敌人奖励更多经验：蝙蝠 30，史莱姆 20
-            gainXP(battling.type === 'bat' ? 30 : 20);
+            // 越往外的怪经验越多：蝙蝠 30 / 史莱姆 20，每层 +15
+            gainXP((battling.type === 'bat' ? 30 : 20) + (battling.tier || 0) * 15);
             giveEnemyLoot(battling.type);    // 掉落装备
-            // 若史莱姆已清光且尚无 Boss（仅在地面世界），则生成 Boss 关卡
-            if (currentMap === 'grass' && slimes.length === 0 && !boss) spawnBoss();
-        } else if (battling === boss) {     // 击败 Boss
+            dropPulls(battling.type);        // 掉落抽数
+        } else if (battling === boss) {     // 击败可选精英史莱姆王
             boss = null;
-            gainXP(80);                     // 击败 Boss 奖励大量经验
-            giveEnemyLoot('boss');           // Boss 必掉强力装备
-            document.getElementById('winMsg').style.display = 'flex';  // 胜利
+            gainXP(80);                     // 奖励大量经验
+            giveEnemyLoot('boss');           // 必掉强力装备
+            dropPulls('boss');               // 掉落 5 抽数
+            addPickup('👑 击败精英史莱姆王！怪物环绕，可继续自由冒险');
         }
     }
     battling = null;
@@ -1301,6 +1527,7 @@ function explodeEnemies(ex, ey, damage, radius) {
                 slimes.splice(i, 1);   // 火球直接消灭史莱姆 + 经验
                 gainXP(s.type === 'bat' ? 30 : 20);
                 giveEnemyLoot(s.type);  // 火球击杀同样掉落装备
+                dropPulls(s.type);      // 火球击杀同样掉落抽数
             }
         }
     }
@@ -1309,14 +1536,14 @@ function explodeEnemies(ex, ey, damage, radius) {
         const bx = boss.gx*tile + PIX/2, by = boss.gy*tile + PIX/2;
         if (Math.hypot(bx-cx, by-cy) <= radius) {
             boss.hp -= damage;
-            if (boss.hp <= 0) {         // 火球击倒 Boss
+            if (boss.hp <= 0) {         // 火球击倒可选精英
                 boss = null;
-                document.getElementById('winMsg').style.display = 'flex';
+                giveEnemyLoot('boss');   // 火球击倒同样掉落装备与抽数
+                dropPulls('boss');
+                addPickup('👑 火球轰倒精英史莱姆王！可继续自由冒险');
             }
         }
     }
-    // 若史莱姆被火球清光且尚无 Boss（仅地面世界），则生成 Boss
-    if (currentMap === 'grass' && !boss && slimes.length === 0) spawnBoss();
 }
 
 // 每帧更新火球飞行与冷却
@@ -1328,7 +1555,7 @@ function updateFireball(dt) {
     fireball.y += fireball.dy * fireball.speed * (dt * 60);
     // 命中障碍物或飞出地图 → 爆炸
     const gx = Math.floor(fireball.x / tile), gy = Math.floor(fireball.y / tile);
-    const hitWall = gx < 0 || gy < 0 || gx >= MAP_W || gy >= MAP_H || map[gy][gx] !== 0;
+    const hitWall = worldTile(gx, gy) !== 0;   // 无限世界中撞到 树/石/水晶 即爆炸
     if (hitWall) {
         explodeEnemies(fireball.x, fireball.y, 30, 70);   // 伤害 30，范围 70px
         fireball = null;
@@ -1554,11 +1781,11 @@ document.addEventListener('keydown', e => {
     if (k === 'q' && !battling) castFireball();
     // Enter：站在洞穴入口(400,300)进洞穴；站在洞穴出口(656,272)返回地面
     if (k === 'enter' && !battling) {
-        if (currentMap === 'grass' && nearWorld(400, 300)) enterCave();
-        else if (currentMap === 'cave' && nearWorld(20*tile+16, 8*tile+16)) exitCave();
+        if (currentMap === 'grass' && nearWorld(GATE_WORLD.gx * tile + 16, GATE_WORLD.gy * tile + 16)) enterCave();
+        else if (currentMap === 'cave' && nearWorld(GATE_CAVE.gx * tile + 16, GATE_CAVE.gy * tile + 16)) exitCave();
     }
-    // R 重新开始：胜利后 或 玩家死亡时
-    if (k === 'r' && !battling && (player.hp <= 0 || (!boss && slimes.length === 0))) {
+    // R 重新开始：死亡时始终可重开；活着时非战斗且未开面板即可重开
+    if (k === 'r' && gameStarted && (player.hp <= 0 || !battling) && !panelsOpen()) {
         resetGame();
     }
 });
@@ -1589,6 +1816,12 @@ function gameLoop(t) {
     autoSaveTimer += dt;
     if (autoSaveTimer >= 4) { autoSaveTimer = 0; saveGame(); }
 
+    // 开放世界：每 5 秒补充敌人至目标数量，保证随时有怪可打
+    if (!battling) {
+        respawnTimer += dt;
+        if (respawnTimer >= 5) { respawnTimer = 0; replenishWorld(); }
+    }
+
     draw();
     updateHUD();
     requestAnimationFrame(gameLoop);
@@ -1601,12 +1834,14 @@ let autoSaveTimer = 0;
    重置游戏
    ========================================================= */
 function resetGame() {
-    player = { x: 12*PIX, y: 12*PIX, lv: 1, hp: 100, maxHp: 100, mp: 50, maxMp: 50, energy: 0, atk: 10, xp: 0, xpNeed: 100, dirX: 1, dirY: 0, equip: { weapon: null, armor: null }, inventory: [] };
+    player = { x: 0, y: 0, lv: 1, hp: 100, maxHp: 100, mp: 50, maxMp: 50, energy: 0, pulls: 0, pityTotal: 0, pity4: 0, gachaGuarantee: false, fateTarget: 'sword_star', fatePoints: 0, atk: 10, xp: 0, xpNeed: 100, dirX: 1, dirY: 0, equip: { weapon: null, armor: null }, inventory: [] };
     currentMap = 'grass';                                  // 回到地面世界
     boss = null;
     fireCool = 0; fireball = null; explosion = null;   // 重置火球状态
+    battling = null; respawnTimer = 0;
     buildGrassMap();
     spawnSlimes(5);
+    document.getElementById('battlePanel').style.display = 'none';  // 收起战斗面板
     document.getElementById('winMsg').style.display = 'none';
     updateHUD();
 }
@@ -1636,14 +1871,30 @@ function saveGame() {
 function loadGame() {
     let d;
     try { d = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) { return false; }
-    if (!d || !d.player || !d.map) return false;
+    if (!d || !d.player) return false;
     player = d.player;
     normalizeEquipment();
-    currentMap = d.currentMap;
-    map = d.map;
-    slimes = d.slimes || [];
-    boss = d.boss || null;
-    normalizeEnemies();          // 兼容旧档：补齐敌人 AI / 韧性
+    currentMap = d.currentMap === 'cave' ? 'cave' : 'grass';
+    // 安全出生：旧存档位置可能落在程序化障碍内，移到最近的空地
+    {
+        const gx0 = Math.floor((player.x + PIX / 2) / tile);
+        const gy0 = Math.floor((player.y + PIX / 2) / tile);
+        if (worldTile(gx0, gy0) !== 0) {
+            let found = false;
+            for (let r = 1; r <= 6 && !found; r++)
+                for (let dy = -r; dy <= r && !found; dy++)
+                    for (let dx = -r; dx <= r && !found; dx++)
+                        if (Math.max(Math.abs(dx), Math.abs(dy)) === r && worldTile(gx0 + dx, gy0 + dy) === 0) {
+                            player.x = (gx0 + dx) * tile + (tile - PIX) / 2;
+                            player.y = (gy0 + dy) * tile + (tile - PIX) / 2;
+                            found = true;
+                        }
+        }
+    }
+    // 开放世界：不依赖序列化的地形，按当前位置重新铺一层怪
+    if (currentMap === 'cave') spawnBats(6); else spawnSlimes(5);
+    boss = null;
+    document.getElementById('winMsg').style.display = 'none';
     return true;
 }
 
@@ -1698,6 +1949,13 @@ document.getElementById('btnUlt').addEventListener('click', onUlt);
 document.getElementById('btnStart').addEventListener('click', startNewGame);
 document.getElementById('btnContinue').addEventListener('click', continueGame);
 
+// HUD 左上角面板：折叠 / 展开（折叠仅保留标题行，不遮挡视野）
+document.getElementById('hudToggle').addEventListener('click', () => {
+    const hud = document.getElementById('hud');
+    const isCollapsed = hud.classList.toggle('collapsed');
+    document.getElementById('hudToggle').textContent = isCollapsed ? '+' : '−';
+});
+
 // 开始屏初始化：有存档则显示"继续冒险"按钮
 if (hasSave()) document.getElementById('btnContinue').style.display = 'inline-block';
 
@@ -1716,10 +1974,10 @@ const CODE_VERSION = 'RPG1';
 
 // 收集一份可序列化的存档数据（游戏中取当前状态；开始屏优先取已存存档）
 function collectSaveData() {
-    if (gameStarted) return { player, currentMap, map, slimes, boss };
+    if (gameStarted) return { player, currentMap, slimes, boss };
     let stored = null;
     try { stored = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) {}
-    return stored || { player, currentMap, map, slimes, boss };
+    return stored || { player, currentMap, slimes, boss };
 }
 
 // 存档数据 -> 存档码（base64 + 校验和，便于跨浏览器搬运）
@@ -1740,7 +1998,7 @@ function fromCode(code) {
         for (let i = 0; i < bin.length; i++) sum = (sum + bin.charCodeAt(i)) & 0xff;
         if (sum.toString(16).padStart(2, '0') !== parts[1]) return null;
         const d = JSON.parse(decodeURIComponent(escape(bin)));
-        if (!d.player || !d.map) return null;
+        if (!d.player) return null;
         return d;
     } catch (e) { return null; }
 }
@@ -1749,11 +2007,26 @@ function fromCode(code) {
 function applySave(d) {
     player = d.player;
     normalizeEquipment();
-    currentMap = d.currentMap;
-    map = d.map;
-    slimes = d.slimes || [];
-    boss = d.boss || null;
-    normalizeEnemies();                        // 兼容旧档：补齐敌人 AI / 韧性
+    currentMap = d.currentMap === 'cave' ? 'cave' : 'grass';
+    // 安全出生：旧存档位置可能落在程序化障碍内，移到最近的空地
+    {
+        const gx0 = Math.floor((player.x + PIX / 2) / tile);
+        const gy0 = Math.floor((player.y + PIX / 2) / tile);
+        if (worldTile(gx0, gy0) !== 0) {
+            let found = false;
+            for (let r = 1; r <= 6 && !found; r++)
+                for (let dy = -r; dy <= r && !found; dy++)
+                    for (let dx = -r; dx <= r && !found; dx++)
+                        if (Math.max(Math.abs(dx), Math.abs(dy)) === r && worldTile(gx0 + dx, gy0 + dy) === 0) {
+                            player.x = (gx0 + dx) * tile + (tile - PIX) / 2;
+                            player.y = (gy0 + dy) * tile + (tile - PIX) / 2;
+                            found = true;
+                        }
+        }
+    }
+    // 开放世界：不依赖序列化的地形，按当前位置重新铺一层怪
+    if (currentMap === 'cave') spawnBats(6); else spawnSlimes(5);
+    boss = null;
     fireCool = 0; fireball = null; explosion = null;
     document.getElementById('winMsg').style.display = 'none';
     localStorage.setItem(SAVE_KEY, JSON.stringify(d));
@@ -1828,11 +2101,12 @@ document.getElementById('btnExportJump').addEventListener('click', openSavePanel
 document.getElementById('btnImportJump').addEventListener('click', openSavePanel);
 // 游戏中按 L 呼出存取面板（非战斗中）
 document.addEventListener('keydown', e => {
-    if (gameStarted && e.key.toLowerCase() === 'l' && !battling) openSavePanel();
+    if (gameStarted && e.key.toLowerCase() === 'l' && !battling
+        && document.getElementById('gachaPanel').style.display !== 'flex') openSavePanel();
 });
 // 按 Escape 关闭面板
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeSavePanel(); closeEqPanel(); }
+    if (e.key === 'Escape') { closeSavePanel(); closeEqPanel(); closeGachaPanel(); }
 });
 
 /* =========================================================
@@ -1840,7 +2114,8 @@ document.addEventListener('keydown', e => {
    ========================================================= */
 function panelsOpen() {
     return document.getElementById('eqPanel').style.display === 'flex'
-        || document.getElementById('savePanel').style.display === 'flex';
+        || document.getElementById('savePanel').style.display === 'flex'
+        || document.getElementById('gachaPanel').style.display === 'flex';
 }
 
 function renderEquipment() {
@@ -1888,11 +2163,214 @@ function toggleEqPanel() {
 // I 键呼出装备面板（游戏中、非战斗、存档面板未打开时）
 document.addEventListener('keydown', e => {
     if (e.key.toLowerCase() === 'i' && gameStarted && !battling
-        && document.getElementById('savePanel').style.display !== 'flex') {
+        && document.getElementById('savePanel').style.display !== 'flex'
+        && document.getElementById('gachaPanel').style.display !== 'flex') {
         toggleEqPanel();
     }
 });
 document.getElementById('btnCloseEq').addEventListener('click', closeEqPanel);
+
+/* =========================================================
+   卡池 / 抽卡系统（按 K 呼出）
+   击败怪物掉落"抽数"，消耗抽数随机抽取装备/药水
+   ========================================================= */
+// 卡池内容：每个条目 { name, rarity, func }
+const GACHA_POOL = [
+    // 普通（55%）
+    { name: '铁剑',       rarity: 'common', wp: 20, item: 'iron_sword' },
+    { name: '皮甲',       rarity: 'common', wp: 20, item: 'leather_armor' },
+    // 稀有（28%）
+    { name: '勇者之剑',   rarity: 'rare',   wp: 11, item: 'hero_sword' },
+    { name: '水晶战甲',   rarity: 'rare',   wp: 11, item: 'crystal_armor' },
+    // 史诗（14%）
+    { name: '圣剑·晨曦',  rarity: 'epic',   wp: 7,  item: 'sword_sun' },
+    { name: '秘银战铠',   rarity: 'epic',   wp: 7,  item: 'armor_mithril' },
+    { name: '虚空重甲',   rarity: 'epic',   wp: 7,  item: 'armor_void', limited: true },
+    // 传说（3%）
+    { name: '传说·光暗之刃', rarity: 'legend', wp: 3, item: 'sword_legend' },
+    { name: '星河之刃',   rarity: 'legend', wp: 3,  item: 'sword_star', limited: true },
+    // 药水（始终可用的安慰奖）
+    { name: '治愈药水',   rarity: 'common', wp: 21, item: 'potion' },
+];
+const RARITY_CLS   = { common: 'r-common', rare: 'r-rare', epic: 'r-epic', legend: 'r-legend' };
+const RARITY_NAME  = { common: '普通', rare: '稀有', epic: '史诗', legend: '传说' };
+// 原神式概率展示
+const GACHA_RATE_CN = {
+    common: '其余概率',
+    rare:   '高概率',
+    epic:   '5.1% · 每10抽必出',
+    legend: '0.6% · 60抽内保底',
+};
+// 本期 UP 限定（传说 50/50 与大保底机制指向的限定装备）
+const UP_ITEM = 'sword_star';
+// 原神式保底常量
+const LEGEND_HARD = 55;     // 传说硬保底（原神为 90，这里按掉落节奏缩为 55）
+const LEGEND_SOFT = 45;     // 软保底起始抽数
+const LEGEND_BASE = 0.006;  // 基础出传说概率 0.6%
+const EPIC_PITY   = 10;     // 每 10 抽必出一件"史诗或更高"（4星保底）
+const FATE_MAX    = 2;      // 定轨命定值上限：满 2 点后下次传说必出目标
+
+// 定轨目标列表：卡池内全部传说武器
+const FATE_TARGETS = GACHA_POOL.filter(e => e.rarity === 'legend');
+
+// 渲染定轨目标选择与命定值槽
+function renderEpitomize() {
+    const target = player.fateTarget || UP_ITEM;
+    const box = document.getElementById('epitTargets');
+    box.innerHTML = FATE_TARGETS.map(e =>
+        '<button class="epitBtn' + (e.item === target ? ' active' : '') + '" data-target="' + e.item + '">'
+        + e.name + (e.item === UP_ITEM ? ' 🔥UP' : '') + '</button>'
+    ).join('');
+    // 命定值灯
+    const meter = document.getElementById('fateMeter');
+    let dots = '';
+    for (let i = 0; i < FATE_MAX; i++) dots += '<span class="' + (i < player.fatePoints ? 'on' : '') + '">◆</span>';
+    meter.innerHTML = dots;
+    document.getElementById('fatePoints').textContent = player.fatePoints;
+    box.querySelectorAll('.epitBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (btn.dataset.target === player.fateTarget) return;
+            player.fateTarget = btn.dataset.target;   // 原神规则：更换定轨会清零命定值
+            player.fatePoints = 0;
+            renderEpitomize();
+            saveGame();
+            setGachaResult('🎯 已定轨「' + ITEMS[player.fateTarget].name + '」，命定值清零。', '');
+        });
+    });
+}
+
+function renderGachaPool() {
+    const list = document.getElementById('gachaPool');
+    const limited = GACHA_POOL.filter(e => e.limited);
+    const rest = GACHA_POOL.filter(e => !e.limited);
+    const itemHtml = e => '<div class="gachaItem rar-' + e.rarity + '">'
+        + '<span>' + e.name + (e.limited ? ' <b style="color:#ff6b4a">🔥 限定</b>' : '') + '</span>'
+        + '<span class="gachaPct"' + (e.limited ? ' style="color:#ff6b4a"' : '') + '>' + GACHA_RATE_CN[e.rarity] + ' · ' + RARITY_NAME[e.rarity] + '</span></div>';
+
+    const up = limited.length
+        ? '<div class="eqHead" style="color:#ffd95e">★ 本期 UP 限定 ★</div>'
+          + limited.map(itemHtml).join('')
+          + '<div class="eqHead" style="color:#d8c8e0">┈ 全部卡池 ┈</div>'
+        : '';
+    list.innerHTML = up + rest.map(itemHtml).join('');
+}
+
+function updateGachaUI() {
+    document.getElementById('gachaPulls').textContent = player.pulls;
+    document.getElementById('btnPull1').disabled = player.pulls < 1;
+    renderEpitomize();        // 刷新定轨目标与命定值槽
+}
+
+// 抽取一次，返回获得的奖励；按原神式保底与 50/50 结算
+function doPull() {
+    if (player.pulls < 1) return null;
+    player.pulls--;
+    player.pityTotal++;        // 传说保底计数
+    player.pity4++;            // 4星(史诗)保底计数
+
+    // ---- 决定本次抽到的星级档位 ----
+    let tier;                                       // 'legend' | 'epic' | 'rare' | 'common'
+    const pity = player.pityTotal;
+    // ① 传说：软保底递增，硬保底必出
+    const softP = pity >= LEGEND_SOFT ? Math.min(0.5, (pity - LEGEND_SOFT) * 0.05) : 0;
+    const legendP = pity >= LEGEND_HARD ? 1 : LEGEND_BASE + softP;
+    if (Math.random() < legendP) {
+        tier = 'legend';
+    } else {
+        // ② 史诗(4星)：基础 5.1%，且满 EPIC_PITY 抽必出一件史诗
+        const epicP = player.pity4 >= EPIC_PITY ? 1 : 0.051;
+        if (Math.random() < epicP) tier = 'epic';
+        else tier = (Math.random() < 0.5 ? 'rare' : 'common');
+    }
+
+    // ---- 在该档位内挑选具体道具 ----
+    let chosen;
+    if (tier === 'legend') {
+        // 原神武器卡池式结算：定轨命定值 → 大保底 → 50/50
+        const pool = GACHA_POOL.filter(e => e.rarity === 'legend');
+        const target = player.fateTarget || UP_ITEM;
+        if (player.fatePoints >= FATE_MAX) {                     // 命定值满 → 必出定轨目标
+            chosen = pool.find(e => e.item === target) || pool[0];
+            player.fatePoints = 0;                               // 兑现后清零
+            player.gachaGuarantee = false;                       // 同时视为保底已兑现
+        } else if (player.gachaGuarantee) {                      // 大保底 → 必出 UP
+            chosen = pool.find(e => e.item === UP_ITEM);
+            player.gachaGuarantee = false;
+            player.fatePoints = chosen.item === target ? 0 : Math.min(FATE_MAX, player.fatePoints + 1);
+        } else {                                                 // 正常 50/50
+            const isUp = Math.random() < 0.5;
+            chosen = isUp ? pool.find(e => e.item === UP_ITEM) : pool.find(e => e.item !== UP_ITEM);
+            player.gachaGuarantee = !isUp;                       // 歪了 → 开启大保底
+            player.fatePoints = chosen.item === target ? 0 : Math.min(FATE_MAX, player.fatePoints + 1);
+        }
+        player.pityTotal = 0;                       // 出传说，传说保底清零
+        player.pity4 = 0;                           // 出传说同属"≥史诗"，4星保底清零
+    } else {
+        const same = GACHA_POOL.filter(e => e.rarity === tier && e.item !== 'potion');
+        chosen = same[(Math.random() * same.length) | 0];
+        if (tier === 'epic') player.pity4 = 0;      // 出史诗 → 4星保底清零
+    }
+
+    grantPullReward(chosen, tier);
+    updateGachaUI();
+    updateHUD();
+    saveGame();
+    return chosen;
+}
+
+// 发放抽卡奖励到玩家身上（tier 供显示用）
+function grantPullReward(chosen, tier) {
+    const res = document.getElementById('gachaResult');
+    const isUp = chosen.item === UP_ITEM;              // 是否抽中 UP 传说
+    if (chosen.item === 'potion') {                    // 药水：立即回血
+        const heal = Math.min(player.maxHp, player.hp + 60);
+        const got = heal - player.hp;
+        player.hp = heal;
+        res.className = 'r-common pull-new';
+        res.textContent = '🍶 ' + chosen.name + '：回复 ' + got + ' HP！';
+    } else {                                           // 装备
+        addItem(chosen.item);
+        res.className = RARITY_CLS[chosen.rarity] + ' pull-new'
+                      + ((chosen.limited || isUp) ? ' pulled-limited' : '');
+        let tag;
+        if (chosen.rarity === 'legend' && chosen.item === (player.fateTarget || UP_ITEM))
+                                                 tag = '🎯✨ 命中定轨目标！得到 ' + chosen.name + '！';
+        else if (isUp)                           tag = '🌟🌈 限定UP！得到 ' + chosen.name + '！';
+        else if (chosen.rarity === 'legend')     tag = '🚫 歪了…得到 ' + chosen.name + '（非定轨 → 命定值 +1）';
+        else if (chosen.limited)                 tag = '🌈🔥 限定！抽中：' + chosen.name;
+        else                                     tag = (chosen.rarity === 'legend' ? '🌟 传说！' : (chosen.rarity === 'epic' ? '✨ 史诗！' : '🃏 ')) + ' 抽中：' + chosen.name;
+        res.textContent = tag;
+    }
+}
+
+function openGachaPanel() {
+    closeSavePanel(); closeEqPanel();      // 收起其它面板
+    renderGachaPool();
+    updateGachaUI();
+    setGachaResult('点击抽取，试试手气！', '');
+    document.getElementById('gachaPanel').style.display = 'flex';
+}
+function closeGachaPanel() {
+    document.getElementById('gachaPanel').style.display = 'none';
+}
+function toggleGachaPanel() {
+    if (document.getElementById('gachaPanel').style.display === 'flex') closeGachaPanel();
+    else openGachaPanel();
+}
+function setGachaResult(txt, cls) {
+    const res = document.getElementById('gachaResult');
+    res.className = (cls || '');
+    res.textContent = txt;
+}
+// K 键呼出卡池（游戏中、非战斗、其它面板未打开）
+document.addEventListener('keydown', e => {
+    if (e.key.toLowerCase() === 'k' && gameStarted && !battling && !panelsOpen()) {
+        toggleGachaPanel();
+    }
+});
+document.getElementById('btnPull1').addEventListener('click', () => doPull());
+document.getElementById('btnCloseGacha').addEventListener('click', closeGachaPanel);
+renderGachaPool();
 
 /* =========================================================
    装备面板：拖拽交互
