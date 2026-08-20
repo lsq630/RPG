@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>复古像素 RPG 迷你游戏</title>
+<style>
+    /* ============ 页面整体：复古深色背景 + 像素风格 ============ */
+    body {
+        margin: 0;
+        padding: 0;
+        background: #1a140e;                 /* 深棕夜空底色 */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        font-family: 'Courier New', monospace; /* 等宽像素感字体 */
+        color: #e8d8b8;
+    }
+
+    /* 游戏主容器 */
+    #gameWrap {
+        position: relative;
+        border: 6px solid #4a3620;           /* 木框色边框 */
+        box-shadow: 0 0 0 3px #000, 0 0 30px rgba(0,0,0,.6);
+        background: #2f6b2f;                 /* 草地底色 */
+        image-rendering: pixelated;
+    }
+
+    /* ============ 顶部 HUD 状态栏 ============ */
+    #hud {
+        position: absolute;                  /* 覆盖在游戏画面左上角 */
+        top: 8px;
+        left: 8px;
+        background: rgba(20, 15, 8, 0.85);
+        border: 3px solid #7a5a2e;
+        padding: 8px 12px;
+        font-size: 13px;
+        line-height: 1.5;
+        z-index: 10;
+        user-select: none;
+        min-width: 190px;
+    }
+    #hud b { color: #ffd95e; }              /* 数值高亮 */
+    #hudRow1 { display: flex; justify-content: space-between; gap: 20px; }
+
+    /* 经验进度条 */
+    #xpWrap {
+        margin-top: 6px;
+        height: 10px;
+        background: #2a2a2a;
+        border: 2px solid #555;
+        position: relative;
+    }
+    #xpBar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(180deg, #8a78ff, #4a3bd0); /* 紫色经验条 */
+        transition: width .2s;
+    }
+    #xpText {
+        position: absolute;
+        width: 100%;
+        top: -6px;
+        text-align: center;
+        font-size: 11px;
+        color: #fff;
+        text-shadow: 1px 1px 0 #000;
+    }
+
+    /* ============ 战斗弹窗面板 ============ */
+    #battlePanel {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        display: none;                        /* 默认隐藏，战斗时显示 */
+        justify-content: center;
+        align-items: center;
+        z-index: 20;
+    }
+    #battleBox {
+        width: 420px;
+        background: #26211a;
+        border: 4px solid #8a6a3a;
+        padding: 18px;
+        box-shadow: inset 0 0 0 2px #4a3620;
+    }
+    #battleBox h2 {
+        margin: 0 0 14px;
+        text-align: center;
+        color: #ffd95e;
+        letter-spacing: 4px;
+        font-size: 18px;
+    }
+    /* 通用血条样式 */
+    .hpRow { margin: 10px 0; }
+    .hpRow .label { display: flex; justify-content: space-between; font-size: 13px; }
+    .hpTrack {
+        height: 16px;
+        background: #3a2222;
+        border: 2px solid #000;
+        margin-top: 3px;
+    }
+    .hpFill {
+        height: 100%;
+        background: linear-gradient(180deg, #7dff7d, #25a525); /* 绿色敌我 HP */
+        transition: width .25s;
+        width: 100%;
+    }
+    #enemyHpFill { background: linear-gradient(180deg, #ff7d7d, #a52525); }
+
+    /* 战斗按钮区 */
+    #battleBtns {
+        display: flex;
+        gap: 14px;
+        margin-top: 18px;
+        justify-content: center;
+    }
+    #battleBtns button {
+        font-family: inherit;
+        font-size: 16px;
+        padding: 10px 26px;
+        background: #4a3620;
+        color: #ffe9ae;
+        border: 3px solid #8a6a3a;
+        cursor: pointer;
+        letter-spacing: 2px;
+    }
+    #battleBtns button:hover { background: #6a4a28; }
+
+    /* 战报文本 */
+    #logLine {
+        margin-top: 12px;
+        text-align: center;
+        min-height: 18px;
+        color: #ffd95e;
+        font-size: 14px;
+    }
+
+    /* 获胜浮层提示 */
+    #winMsg {
+        position: absolute;
+        inset: 0;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 30;
+        background: rgba(0,0,0,.7);
+    }
+    #winBox {
+        text-align: center;
+        color: #ffd95e;
+        font-size: 22px;
+        border: 4px solid #8a6a3a;
+        padding: 30px 50px;
+        background: #26211a;
+        letter-spacing: 4px;
+    }
+
+    /* 底部操作提示 */
+    #hint {
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(20,15,8,.8);
+        padding: 5px 14px;
+        font-size: 12px;
+        color: #cfc0a0;
+        border: 2px solid #4a3620;
+        z-index: 10;
+    }
+
+    /* ============ 进入界面（开始屏） ============ */
+    #startScreen {
+        position: absolute;
+        inset: 0;
+        z-index: 40;                       /* 覆盖在所有层之上 */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle at 50% 30%, #1c2f1c 0%, #0e150e 70%, #060a06 100%);
+    }
+    #startBox {
+        width: 520px;
+        text-align: center;
+        background: #26211a;
+        border: 4px solid #8a6a3a;
+        padding: 28px 34px 24px;
+        box-shadow: 0 0 0 3px #000, inset 0 0 24px rgba(0,0,0,.55);
+    }
+    /* 标题：金色发光 + 像素感 */
+    #startTitle {
+        font-size: 34px;
+        font-weight: bold;
+        letter-spacing: 6px;
+        color: #ffd95e;
+        text-shadow: 0 0 10px #b8860b, 0 3px 0 #7a5a00, 0 0 22px rgba(255,200,60,.5);
+        margin-bottom: 6px;
+    }
+    #startSub {
+        font-size: 14px;
+        color: #cfc0a0;
+        letter-spacing: 3px;
+        margin-bottom: 20px;
+        border-bottom: 2px dashed #4a3620;
+        padding-bottom: 14px;
+    }
+    /* 操作说明表 */
+    #startControls {
+        width: 400px;
+        margin: 0 auto 18px;
+        border: 3px solid #4a3620;
+        background: rgba(0,0,0,.35);
+        padding: 12px 18px;
+        text-align: left;
+    }
+    .ctrlRow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 5px 0;
+        font-size: 14px;
+    }
+    .ctrlRow .key {
+        background: #3a2c1a;
+        border: 2px solid #8a6a3a;
+        padding: 2px 10px;
+        color: #ffe9ae;
+        font-weight: bold;
+        letter-spacing: 1px;
+        min-width: 70px;
+        text-align: center;
+    }
+    .ctrlRow .desc { color: #e0d0b0; }
+    /* 玩法说明 */
+    #startGoal {
+        font-size: 13px;
+        color: #9fe09f;
+        margin-bottom: 18px;
+        line-height: 1.6;
+    }
+    /* 开始按钮 */
+    #btnStart {
+        font-family: inherit;
+        font-size: 20px;
+        letter-spacing: 6px;
+        padding: 12px 44px;
+        background: #7a4a1e;
+        color: #ffe9ae;
+        border: 3px solid #c08a3a;
+        cursor: pointer;
+        animation: btnPulse 1s ease-in-out infinite;
+    }
+    #btnStart:hover { background: #9a6a2e; color: #fff; }
+    @keyframes btnPulse {
+        0%,100% { box-shadow: 0 0 6px 2px rgba(255,180,60,.35); }
+        50%     { box-shadow: 0 0 18px 6px rgba(255,180,60,.7); }
+    }
+    /* 继续冒险按钮（有存档时显示） */
+    #btnContinue {
+        font-family: inherit;
+        font-size: 16px;
+        letter-spacing: 5px;
+        padding: 10px 36px;
+        margin-top: 12px;
+        background: #3a5a1e;
+        color: #e6ffc0;
+        border: 3px solid #7aa83a;
+        cursor: pointer;
+        animation: btnPulse 1s ease-in-out infinite;
+    }
+    #btnContinue:hover { background: #4a6a2e; color: #fff; }
+    #startTip {
+        margin-top: 12px;
+        font-size: 12px;
+        color: #a09080;
+        letter-spacing: 2px;
+    }
+</style>
+</head>
+<body>
+
+<div id="gameWrap">
+    <!-- 画布：800x600 的草地地图 -->
+    <canvas id="game" width="800" height="600"></canvas>
+
+    <!-- 左上角 HUD：等级 / HP / 攻击力 / 经验条 -->
+    <div id="hud">
+        <div id="hudRow1">
+            <span>等级 <b id="hudLv">1</b></span>
+            <span>攻击 <b id="hudAtk">10</b></span>
+        </div>
+        <div>HP <b id="hudHp">100</b>/<b id="hudMaxHp">100</b></div>
+        <div>MP <b id="hudMp">50</b>/<b id="hudMaxMp">50</b> <span id="hudCd" style="color:#ff9d5e"></span></div>
+        <div id="saveTip" style="color:#7fbf7f; font-size:11px; opacity:0; transition:opacity .4s">已自动保存</div>
+        <div id="xpWrap">
+            <div id="xpBar"></div>
+            <div id="xpText"></div>
+        </div>
+    </div>
+
+    <!-- 回合制战斗面板 -->
+    <div id="battlePanel">
+        <div id="battleBox">
+            <h2>⚔ 战斗！ ⚔</h2>
+            <div class="hpRow">
+                <div class="label"><span id="enemyName">史莱姆</span><span id="enemyHpTxt">20/20</span></div>
+                <div class="hpTrack"><div class="hpFill" id="enemyHpFill"></div></div>
+            </div>
+            <div class="hpRow">
+                <div class="label"><span>勇者</span><span id="heroHpTxt"></span></div>
+                <div class="hpTrack"><div class="hpFill" id="heroHpFill"></div></div>
+            </div>
+            <div id="battleBtns">
+                <button id="btnAttack">攻击</button>
+                <button id="btnDefend">防御</button>
+            </div>
+            <div id="logLine">选择你的行动！</div>
+        </div>
+    </div>
+
+    <!-- 全灭胜利提示 -->
+    <div id="winMsg"><div id="winBox">🎉 胜利！Boss 被击败 🎉<br><small style="font-size:14px">按 R 重新开始</small></div></div>
+
+    <!-- 底部提示 -->
+    <div id="hint">WASD 移动 | 敌人前按空格战斗 | Q 火球术(10MP/30伤/3s) | 紫色传送门处按 Enter 进洞穴 | 绿色门按 Enter 返回</div>
+
+    <!-- 进入界面：游戏未开始时展示 -->
+    <div id="startScreen">
+        <div id="startBox">
+            <!-- 标题区 -->
+            <div id="startTitle">⚔ 像素勇者 ⚔</div>
+            <div id="startSub">2D 俯视角 RPG · 迷你冒险</div>
+
+            <!-- 操作说明卡 -->
+            <div id="startControls">
+                <div class="ctrlRow"><span class="key">W A S D</span><span class="desc">移动</span></div>
+                <div class="ctrlRow"><span class="key">空格</span><span class="desc">回合制战斗</span></div>
+                <div class="ctrlRow"><span class="key">Q</span><span class="desc">火球术（10MP / 30伤 / 3s冷却）</span></div>
+                <div class="ctrlRow"><span class="key">Enter</span><span class="desc">紫色传送门进洞穴 / 绿色门返回</span></div>
+                <div class="ctrlRow"><span class="key">R</span><span class="desc">重新开始</span></div>
+            </div>
+
+            <!-- 玩法说明 -->
+            <div id="startGoal">击败史莱姆与洞穴蝙蝠获取经验升级，挑战紫色史莱姆王通关！</div>
+
+            <!-- 开始按钮 -->
+            <button id="btnStart">开始冒险</button>
+            <button id="btnContinue" style="display:none">继续冒险</button>
+            <div id="startTip">或按 Enter 开始（有存档时 Enter 继续）</div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* =========================================================
+   全局变量与常量
+   ========================================================= */
+const canvas    = document.getElementById('game');
+const ctx       = canvas.getContext('2d');
+const PIX       = 32;                 // 单格像素大小（复古格子感）
+
+const MAP_W     = 25;                 // 地图横向格子数 (25*32=800)
+const MAP_H     = 19;                 // 地图纵向格子数 (~19*32=608)
+const tile      = 32;
+
+// 用二维数组记录地图：0=空地 1=树 2=石头
+let map = [];
+// 当前所在的地图：'grass' 地面世界 / 'cave' 黑暗洞穴
+let currentMap = 'grass';
+
+// 玩家对象
+let player = {
+    x: 2 * PIX, y: 2 * PIX,          // 出生位置（格 2,2）
+    lv: 1,
+    hp: 100, maxHp: 100,
+    mp: 50, maxMp: 50,               // 法力值（火球术消耗）
+    atk: 10,
+    xp: 0, xpNeed: 100,              // 升级所需经验
+    dirX: 1, dirY: 0,                // 面向方向（决定火球术方向）
+};
+
+// 史莱姆敌人数组
+let slimes = [];
+// Boss（打败所有史莱姆后出现），null 表示尚未出现或被击败
+let boss = null;
+// 当前战斗的目标（null 表示不处于战斗）
+let battling = null;
+
+// 火球术相关：冷却剩余秒数、飞行中的火球、爆炸特效
+let fireCool = 0;
+let fireball = null;   // { x, y, dx, dy }
+let explosion = null;  // { x, y, ttl } 爆炸扩散动画帧数
+
+// 键盘状态
+const keys = {};
+// 画布中心 = 玩家屏幕中心的偏移（实现"以玩家为中心的镜头"，此处直接用全局坐标便于显示网格）
+const VIEW_W = 800, VIEW_H = 600;
+
+/* =========================================================
+   地图生成
+   地面世界 buildGrassMap：草地 + 树木(1) + 石头(2)
+   黑暗洞穴 buildCaveMap：黑色岩地 + 水晶(1) + 岩石(2)
+   ========================================================= */
+function buildGrassMap() {
+    for (let y = 0; y < MAP_H; y++) {
+        map[y] = [];
+        for (let x = 0; x < MAP_W; x++) map[y][x] = 0;
+    }
+    for (let y = 0; y < MAP_H; y++) {
+        for (let x = 0; x < MAP_W; x++) {
+            if ((x >= 1 && x <= 3 && y >= 1 && y <= 3)) continue; // 出生点留空地
+            const r = Math.random();
+            if (r < 0.10) map[y][x] = 1;          // 树
+            else if (r < 0.16) map[y][x] = 2;     // 石
+        }
+    }
+    // 洞穴入口（中心 400,300 所在格）保持空地，便于走近触发
+    map[9][12] = 0;
+    // 四周围墙采用石头，防止走出地图
+    for (let x = 0; x < MAP_W; x++) { map[0][x] = 2; map[MAP_H-1][x] = 2; }
+    for (let y = 0; y < MAP_H; y++) { map[y][0] = 2; map[y][MAP_W-1] = 2; }
+}
+
+function buildCaveMap() {
+    for (let y = 0; y < MAP_H; y++) {
+        map[y] = [];
+        for (let x = 0; x < MAP_W; x++) map[y][x] = 0;
+    }
+    for (let y = 0; y < MAP_H; y++) {
+        for (let x = 0; x < MAP_W; x++) {
+            if ((x >= 1 && x <= 3 && y >= 1 && y <= 3)) continue; // 入口出生区留空地
+            if (x === 20 && y === 8) continue;                    // 返回地面出口留空地
+            const r = Math.random();
+            if (r < 0.14) map[y][x] = 1;          // 水晶
+            else if (r < 0.24) map[y][x] = 2;     // 岩石
+        }
+    }
+    for (let x = 0; x < MAP_W; x++) { map[0][x] = 2; map[MAP_H-1][x] = 2; }
+    for (let y = 0; y < MAP_H; y++) { map[y][0] = 2; map[y][MAP_W-1] = 2; }
+}
+
+/* =========================================================
+   生成史莱姆（地面世界普通敌人）
+   ========================================================= */
+function spawnSlimes(count) {
+    slimes = [];
+    let placed = 0, guard = 0;
+    while (placed < count && guard < 1000) {
+        guard++;
+        const gx = 2 + Math.floor(Math.random() * (MAP_W - 4));
+        const gy = 2 + Math.floor(Math.random() * (MAP_H - 4));
+        if (map[gy][gx] !== 0) continue;
+        if (Math.abs(gx - 2) + Math.abs(gy - 2) < 6) continue;
+        // 距洞穴入口(12,9)远一些，避免出生即遇怪
+        if (Math.abs(gx - 12) + Math.abs(gy - 9) < 4) continue;
+        let tooClose = slimes.some(s => Math.abs(s.gx-gx)+Math.abs(s.gy-gy) < 3);
+        if (tooClose) continue;
+        slimes.push({ gx, gy, type: 'slime', hp: 20, maxHp: 20 });
+        placed++;
+    }
+}
+
+/* =========================================================
+   生成蝙蝠：洞穴里的更强大敌人（血量更高、伤害更凶）
+   ========================================================= */
+function spawnBats(count) {
+    slimes = [];
+    let placed = 0, guard = 0;
+    while (placed < count && guard < 1000) {
+        guard++;
+        const gx = 2 + Math.floor(Math.random() * (MAP_W - 4));
+        const gy = 2 + Math.floor(Math.random() * (MAP_H - 4));
+        if (map[gy][gx] !== 0) continue;
+        if (Math.abs(gx - 2) + Math.abs(gy - 2) < 5) continue;   // 离洞穴入口远些
+        let tooClose = slimes.some(s => Math.abs(s.gx-gx)+Math.abs(s.gy-gy) < 2);
+        if (tooClose) continue;
+        slimes.push({ gx, gy, type: 'bat', hp: 35, maxHp: 35 }); // 蝙蝠更抗打
+        placed++;
+    }
+}
+
+/* =========================================================
+   地图切换：进入洞穴 / 返回地面
+   ========================================================= */
+// 玩家是否站在指定世界坐标附近（用于触发入口/出口）
+function nearWorld(x, y) {
+    return Math.abs(player.x - x) <= tile && Math.abs(player.y - y) <= tile;
+}
+
+// 进入洞穴：切到黑暗洞穴图，刷新蝙蝠敌人，关闭 Boss
+function enterCave() {
+    currentMap = 'cave';
+    boss = null;                            // 洞穴里没有 Boss 关卡
+    buildCaveMap();
+    spawnBats(6);                           // 洞穴刷新 6 只更强蝙蝠
+    player.x = 2 * PIX; player.y = 2 * PIX; // 出生在洞穴入口
+    fireball = null; explosion = null;      // 清掉可能存在的飞弹
+    saveGame();                             // 切换地图后存档
+}
+
+// 返回地面：回到草地世界，回到洞穴入口坐标(400,300)处
+function exitCave() {
+    currentMap = 'grass';
+    buildGrassMap();
+    spawnSlimes(5);                         // 地面足量史莱姆
+    player.x = 400; player.y = 300;         // 站在洞穴入口格
+    fireball = null; explosion = null;
+    saveGame();                             // 切换地图后存档
+}
+
+/* =========================================================
+   Boss 血量动态公式：随玩家等级成长（等级越高越难打）
+   ========================================================= */
+function bossMaxHp() {
+    // 底数 60 + 每级 25，成长曲线明显高于玩家攻击（每级 +3）的一次方增长
+    return 60 + player.lv * 25;
+}
+
+/* 战斗中玩家升级时，让 Boss 上限同步补涨（并保持其当前受伤比例）
+   这样 Boss 始终与当前等级匹配，不会因固定值而显得太弱 */
+function refreshBossHp() {
+    if (!boss || boss !== battling) return;
+    const newMax = bossMaxHp();
+    const ratio  = boss.hp / boss.maxHp;   // 保留当前剩余血量的百分比
+    boss.maxHp = newMax;
+    boss.hp    = Math.round(newMax * ratio);
+    refreshBattleUI();
+}
+
+/* =========================================================
+   生成 Boss：在所有史莱姆被击败后出现，体型更大、更扛打
+   ========================================================= */
+function spawnBoss() {
+    // 在地图空地上找一个距玩家较远的位置
+    for (let i = 0; i < 500; i++) {
+        const gx = 4 + Math.floor(Math.random() * (MAP_W - 8));
+        const gy = 4 + Math.floor(Math.random() * (MAP_H - 8));
+        if (map[gy][gx] !== 0) continue;
+        if (Math.abs(gx*tile - player.x) + Math.abs(gy*tile - player.y) < 200) continue;
+        const hpScale = bossMaxHp();       // 用动态公式计算初始血量
+        boss = { gx, gy, hp: hpScale, maxHp: hpScale };
+        return;
+    }
+}
+
+/* =========================================================
+   碰撞检测：判断 (px,py) 以像素为单位的玩家矩形是否与障碍重叠
+   ========================================================= */
+function collides(px, py) {
+    // 玩家占一格的左右两条边，四点都要落在空地格上
+    const pts = [
+        [px, py], [px + PIX - 1, py],
+        [px, py + PIX - 1], [px + PIX - 1, py + PIX - 1]
+    ];
+    for (const [cx, cy] of pts) {
+        const gx = Math.floor(cx / PIX), gy = Math.floor(cy / PIX);
+        if (gx < 0 || gy < 0 || gx >= MAP_W || gy >= MAP_H) return true; // 越界即障碍
+        if (map[gy][gx] !== 0) return true;                              // 树/石即障碍
+    }
+    return false;
+}
+
+/* =========================================================
+   移动逻辑：WASD，逐格推进并做碰撞检测
+   ========================================================= */
+function move(dx, dy) {
+    if (dx !== 0) {
+        if (!collides(player.x + dx, player.y)) player.x += dx;
+    }
+    if (dy !== 0) {
+        if (!collides(player.x, player.y + dy)) player.y += dy;
+    }
+    // 防止走到地图边缘外（双重保险）
+    player.x = Math.max(0, Math.min(MAP_W * PIX - PIX, player.x));
+    player.y = Math.max(0, Math.min(MAP_H * PIX - PIX, player.y));
+}
+
+/* =========================================================
+   绘制画面：草地、障碍、史莱姆、玩家
+   ========================================================= */
+function draw() {
+    const isCave = (currentMap === 'cave');
+
+    // ---- 1) 背景底色与棋盘网格（洞穴为黑色岩地）----
+    const groundA = isCave ? '#2a2a2f' : '#3f8f3f';
+    const groundB = isCave ? '#24242a' : '#378437';
+    ctx.fillStyle = groundA;
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    for (let y = 0; y < MAP_H; y++) {
+        for (let x = 0; x < MAP_W; x++) {
+            ctx.fillStyle = (x + y) % 2 === 0 ? groundA : groundB;
+            ctx.fillRect(x * tile, y * tile, tile, tile);
+            // 草地小草丛 / 洞穴岩缝点缀
+            if (map[y][x] === 0 && Math.floor((x*7+y*13)%5) === 0) {
+                ctx.fillStyle = isCave ? '#1d1d22' : '#2f6f2f';
+                ctx.fillRect(x*tile+8, y*tile+8, 4, 4);
+            }
+        }
+    }
+
+    // ---- 2) 障碍物（按地图区分外观）----
+    for (let y = 0; y < MAP_H; y++) {
+        for (let x = 0; x < MAP_W; x++) {
+            const X = x * tile, Y = y * tile;
+            if (map[y][x] === 1) {
+                if (isCave) {                        // 洞穴水晶矿
+                    ctx.fillStyle = '#4a2fae'; ctx.fillRect(X+11, Y+8, 10, 18);
+                    ctx.fillStyle = '#7a5aff'; ctx.fillRect(X+11, Y+8, 5, 18);
+                    ctx.fillStyle = '#b39bff'; ctx.fillRect(X+11, Y+8, 2, 8);   // 冷光
+                } else {                             // 地面树木
+                    ctx.fillStyle = '#5a3a1a'; ctx.fillRect(X+12, Y+22, 8, 10);
+                    ctx.fillStyle = '#2a7a2a'; ctx.beginPath();
+                    ctx.arc(X+16, Y+16, 12, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = '#379037'; ctx.beginPath();
+                    ctx.arc(X+16, Y+13, 7, 0, Math.PI*2); ctx.fill();
+                }
+            } else if (map[y][x] === 2) {
+                if (isCave) {                        // 洞穴暗岩
+                    ctx.fillStyle = '#53535b'; ctx.fillRect(X+2, Y+4, tile-4, tile-6);
+                    ctx.fillStyle = '#63636d'; ctx.fillRect(X+2, Y+4, tile-4, 6);
+                } else {                             // 地面岩石
+                    ctx.fillStyle = '#8a8a8a'; ctx.fillRect(X+3, Y+5, tile-6, tile-6);
+                    ctx.fillStyle = '#a9a9a9'; ctx.fillRect(X+3, Y+5, tile-6, 6);
+                }
+            }
+        }
+    }
+
+    // ---- 2.5) 入口/出口标记（传送门）----
+    if (isCave) drawPortal(20*tile+16, 8*tile+16, '#3fbf3f');  // 洞穴的绿色出口
+    else        drawPortal(400, 300, '#7f5aff');               // 地面的紫色洞穴入口
+
+    // ---- 3) 敌人（按类型绘制：史莱姆 / 蝙蝠）----
+    for (const s of slimes) {
+        const X = s.gx * tile, Y = s.gy * tile;
+        if (s.type === 'bat') {                 // 紫红色蝙蝠（翅膀 + 身体）
+            ctx.fillStyle = '#b0308a';
+            ctx.beginPath(); ctx.moveTo(X+16,Y+13); ctx.lineTo(X+8,Y+5); ctx.lineTo(X+13,Y+13); ctx.closePath(); ctx.fill(); // 左翼
+            ctx.beginPath(); ctx.moveTo(X+16,Y+13); ctx.lineTo(X+24,Y+5); ctx.lineTo(X+19,Y+13); ctx.closePath(); ctx.fill(); // 右翼
+            ctx.beginPath(); ctx.arc(X+16, Y+16, 8, 0, Math.PI*2); ctx.fill();       // 身体
+            ctx.fillStyle = '#ffd000'; ctx.fillRect(X+11,Y+14,3,3); ctx.fillRect(X+19,Y+14,3,3); // 眼睛
+        } else {                                // 绿色液滴史莱姆
+            ctx.fillStyle = '#33cc33';
+            ctx.beginPath(); ctx.arc(X+16, Y+12, 11, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(X+16, Y+20, 11, 0, Math.PI); ctx.fill();
+            ctx.fillStyle = '#000'; ctx.fillRect(X+11, Y+13, 4, 4); ctx.fillRect(X+19, Y+13, 4, 4);
+            ctx.fillStyle = '#ccffcc'; ctx.beginPath(); ctx.arc(X+12, Y+8, 3, 0, Math.PI*2); ctx.fill();
+        }
+    }
+
+    // ---- 3.5) Boss（仅地面世界，暗紫色大史莱姆）----
+    if (boss) {
+        const X = boss.gx * tile, Y = boss.gy * tile;
+        ctx.fillStyle = '#7a33cc';
+        ctx.beginPath(); ctx.arc(X+16, Y+10, 15, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(X+16, Y+22, 15, 0, Math.PI); ctx.fill();
+        ctx.fillStyle = '#000'; ctx.fillRect(X+9, Y+11, 5, 5); ctx.fillRect(X+19, Y+11, 5, 5);
+        ctx.fillStyle = '#e0c6ff'; ctx.beginPath(); ctx.arc(X+11, Y+6, 4, 0, Math.PI*2); ctx.fill();
+    }
+
+    // ---- 3.9) 火球术：飞行火球 + 爆炸效果 ----
+    if (fireball) {
+        ctx.fillStyle = '#ff6a00';
+        ctx.beginPath(); ctx.arc(fireball.x+6, fireball.y+6, 7, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#ffd000';
+        ctx.beginPath(); ctx.arc(fireball.x+6, fireball.y+6, 3, 0, Math.PI*2); ctx.fill();
+    }
+    if (explosion) {
+        const r = 70 - (explosion.ttl / 20) * 70;
+        const a = explosion.ttl / 20;
+        ctx.fillStyle = 'rgba(255,120,20,' + (a * 0.6) + ')';
+        ctx.beginPath(); ctx.arc(explosion.x, explosion.y, Math.max(2, r), 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,220,80,' + a + ')';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(explosion.x, explosion.y, Math.max(2, r), 0, Math.PI*2); ctx.stroke();
+    }
+
+    // ---- 4) 玩家（简单小人）----
+    const px = player.x, py = player.y;
+    ctx.fillStyle = '#1e3a8a'; ctx.fillRect(px+8, py+12, 16, 18);
+    ctx.fillStyle = '#f0c090'; ctx.beginPath(); ctx.arc(px+16, py+10, 8, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#ffd95e'; ctx.fillRect(px+8, py+4, 16, 4);
+
+    // ---- 5) 洞穴黑暗遮罩：以玩家为中心的光圈，营造漆黑氛围 ----
+    if (isCave) {
+        const cxp = player.x + 16, cyp = player.y + 16;
+        const grad = ctx.createRadialGradient(cxp, cyp, 60, cxp, cyp, 250);
+        grad.addColorStop(0, 'rgba(0,0,0,0)');
+        grad.addColorStop(1, 'rgba(0,0,0,0.82)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    }
+}
+
+// 画一个发光的传送门标记（用于洞穴入口 / 出口）
+function drawPortal(x, y, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.arc(x, y, 13, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.beginPath(); ctx.arc(x-4, y-4, 4, 0, Math.PI*2); ctx.fill();
+    // 外圈跳动光环
+    const pulse = 16 + Math.floor((Date.now() / 400) % 4);
+    ctx.strokeStyle = color; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x, y, pulse, 0, Math.PI*2); ctx.stroke();
+}
+
+/* =========================================================
+   HUD 更新：等级 / HP / 攻击 / 经验条
+   ========================================================= */
+function updateHUD() {
+    document.getElementById('hudLv').textContent = player.lv;
+    document.getElementById('hudHp').textContent = player.hp;
+    document.getElementById('hudMaxHp').textContent = player.maxHp;
+    document.getElementById('hudAtk').textContent = player.atk;
+    document.getElementById('hudMp').textContent = player.mp;
+    document.getElementById('hudMaxMp').textContent = player.maxMp;
+    // 冷却剩余提示（仅冷却中显示）
+    document.getElementById('hudCd').textContent = fireCool > 0 ? '冷却 ' + fireCool.toFixed(1) + 's' : '';
+    const ratio = Math.min(1, player.xp / player.xpNeed) * 100;
+    document.getElementById('xpBar').style.width = ratio + '%';
+    document.getElementById('xpText').textContent = player.xp + ' / ' + player.xpNeed;
+}
+
+/* =========================================================
+   升级：经验达到需求值时，攻击+3、HP回满、等级+1
+   ========================================================= */
+function checkLevelUp() {
+    while (player.xp >= player.xpNeed) {
+        player.xp -= player.xpNeed;      // 扣除已用经验
+        player.lv++;
+        player.atk += 3;                 // 攻击力永久 +3
+        player.hp = player.maxHp;        // HP 回满
+        player.mp = player.maxMp;        // MP 也回满
+        updateHUD();
+        refreshBossHp();                 // 若正在打 Boss，让 Boss 血量随等级补涨
+        saveGame();                      // 升级后立即存档
+    }
+}
+
+/* =========================================================
+   获得经验值
+   ========================================================= */
+function gainXP(amount) {
+    player.xp += amount;
+    checkLevelUp();
+    updateHUD();
+}
+
+/* =========================================================
+   检查是否靠近某只史莱姆（用于触发条件）
+   ========================================================= */
+function nearSlime(s) {
+    return Math.abs(player.x - s.gx*tile) <= tile && Math.abs(player.y - s.gy*tile) <= tile;
+}
+
+/* =========================================================
+   进入战斗
+   ========================================================= */
+function startBattle(s) {
+    battling = s;
+    updateHUD();
+    refreshBattleUI();
+    document.getElementById('battlePanel').style.display = 'flex';
+}
+
+/* 刷新型战斗面板 HP 数值与进度条 */
+function refreshBattleUI() {
+    // 根据对手类型显示名称：Boss / 蝙蝠 / 史莱姆
+    let name = '史莱姆';
+    if (battling === boss) name = 'Boss 史莱姆王';
+    else if (battling.type === 'bat') name = '蝙蝠';
+    document.getElementById('enemyName').textContent = name;
+    document.getElementById('enemyHpTxt').textContent = battling.hp + '/' + battling.maxHp;
+    document.getElementById('enemyHpFill').style.width = (battling.hp / battling.maxHp * 100) + '%';
+    document.getElementById('heroHpTxt').textContent = player.hp + '/' + player.maxHp;
+    document.getElementById('heroHpFill').style.width = (player.hp / player.maxHp * 100) + '%';
+}
+
+/* 结束战斗并移除被击败的史莱姆 */
+function endBattle(won) {
+    if (won) {
+        const idx = slimes.indexOf(battling);
+        if (idx > -1) {
+            slimes.splice(idx, 1);          // 地图上移除该史莱姆
+            // 更强敌人奖励更多经验：蝙蝠 30，史莱姆 20
+            gainXP(battling.type === 'bat' ? 30 : 20);
+            // 若史莱姆已清光且尚无 Boss（仅在地面世界），则生成 Boss 关卡
+            if (currentMap === 'grass' && slimes.length === 0 && !boss) spawnBoss();
+        } else if (battling === boss) {     // 击败 Boss
+            boss = null;
+            gainXP(80);                     // 击败 Boss 奖励大量经验
+            document.getElementById('winMsg').style.display = 'flex';  // 胜利
+        }
+    }
+    battling = null;
+    document.getElementById('battlePanel').style.display = 'none';
+    saveGame();                              // 战斗结束后立即存档
+}
+
+/* =========================================================
+   火球术：按 Q 键在地图自由释放，范围伤害
+   消耗 10 MP，造成 30 点范围伤害，冷却 3 秒
+   ========================================================= */
+// 施放火球（需满足：非战斗、冷却结束、MP 充足、正在朝某个方向移动过）
+function castFireball() {
+    if (battling || fireCool > 0 || player.mp < 10) return;
+    player.mp -= 10;                 // 消耗 10 MP
+    fireCool = 3;                    // 冷却 3 秒
+    // 火球从玩家中心出发，沿面向方向飞行
+    fireball = {
+        x: player.x + PIX/2 - 6,
+        y: player.y + PIX/2 - 6,
+        dx: player.dirX, dy: player.dirY,
+        speed: 9,
+    };
+    updateHUD();
+}
+
+// 火球爆炸：对爆炸点周围 radius 内的敌人造成 damage 范围伤害
+function explodeEnemies(ex, ey, damage, radius) {
+    const cx = ex + 6, cy = ey + 6;   // 爆炸中心
+    explosion = { x: cx, y: cy, ttl: 20 };
+    // 对普通史莱姆造成范围伤害
+    for (let i = slimes.length - 1; i >= 0; i--) {
+        const s = slimes[i];
+        const sx = s.gx*tile + PIX/2, sy = s.gy*tile + PIX/2;
+        if (Math.hypot(sx-cx, sy-cy) <= radius) {
+            s.hp -= damage;
+            if (s.hp <= 0) {
+                slimes.splice(i, 1);   // 火球直接消灭史莱姆 + 经验
+                gainXP(20);
+            }
+        }
+    }
+    // 对 Boss 造成范围伤害
+    if (boss) {
+        const bx = boss.gx*tile + PIX/2, by = boss.gy*tile + PIX/2;
+        if (Math.hypot(bx-cx, by-cy) <= radius) {
+            boss.hp -= damage;
+            if (boss.hp <= 0) {         // 火球击倒 Boss
+                boss = null;
+                document.getElementById('winMsg').style.display = 'flex';
+            }
+        }
+    }
+    // 若史莱姆被火球清光且尚无 Boss（仅地面世界），则生成 Boss
+    if (currentMap === 'grass' && !boss && slimes.length === 0) spawnBoss();
+}
+
+// 每帧更新火球飞行与冷却
+function updateFireball(dt) {
+    if (fireCool > 0) fireCool = Math.max(0, fireCool - dt);   // 冷却递减
+    if (!fireball) return;
+    // 推进火球
+    fireball.x += fireball.dx * fireball.speed * (dt * 60);
+    fireball.y += fireball.dy * fireball.speed * (dt * 60);
+    // 命中障碍物或飞出地图 → 爆炸
+    const gx = Math.floor(fireball.x / tile), gy = Math.floor(fireball.y / tile);
+    const hitWall = gx < 0 || gy < 0 || gx >= MAP_W || gy >= MAP_H || map[gy][gx] !== 0;
+    if (hitWall) {
+        explodeEnemies(fireball.x, fireball.y, 30, 70);   // 伤害 30，范围 70px
+        fireball = null;
+    } else if (songDidFireTravelFar()) {                  // 飞太远也会自爆
+        explodeEnemies(fireball.x, fireball.y, 30, 70);
+        fireball = null;
+    }
+}
+
+// 判断火球是否飞得足够远（避免无限飞行）
+function songDidFireTravelFar() {
+    const d = Math.hypot(fireball.x - (player.x + PIX/2 - 6), fireball.y - (player.y + PIX/2 - 6));
+    return d > 240;
+}
+
+/* =========================================================
+   战斗回合逻辑（同时处理敌人回合）
+   ========================================================= */
+let defend = false;          // 记录玩家本回合是否防御
+
+function onAttack() {
+    if (!battling) return;
+    // ---- 我方回合：造成 8~15 浮动伤害 ----
+    const dmg = 8 + Math.floor(Math.random() * 8);           // 8-15
+    battling.hp -= dmg;
+    let log = '你造成 ' + dmg + ' 点伤害！';
+    if (battling.hp <= 0) {                                  // 击败敌人
+        log += (battling === boss) ? ' 史莱姆王被击败！' :
+               (battling.type === 'bat' ? ' 蝙蝠被击败！' : ' 史莱姆被击败！');
+        refreshBattleUI();
+        setTimeout(() => { afterPlayerTurn(false, log); }, 500);
+    } else {
+        refreshBattleUI();
+        setTimeout(() => { afterPlayerTurn(true, log); }, 500);
+    }
+}
+
+function onDefend() {
+    if (!battling) return;
+    defend = true;                                           // 本回合减伤 50%
+    afterPlayerTurn(true, '你采取了防御姿态！');
+}
+
+/* 我方回合结束后，进入敌人回合 */
+function afterPlayerTurn(enemyAlive, log) {
+    if (!enemyAlive) { endBattle(true); return; }
+    document.getElementById('logLine').textContent = log;
+    if (log.indexOf('防御') === -1) refreshBattleUI();
+    // ---- 敌人回合 ----
+    setTimeout(() => {
+        let base = 6 + Math.floor(Math.random() * 5);        // 敌人基础伤害 6-10
+        let name = '史莱姆';
+        if (battling === boss) { base += 8; name = '史莱姆王'; }      // Boss 更凶
+        else if (battling.type === 'bat') { base += 4; name = '蝙蝠'; } // 蝙蝠更强
+        let dmg = defend ? Math.floor(base * 0.5) : base;    // 防御减伤 50%
+        player.hp -= dmg;
+        if (player.hp < 0) player.hp = 0;
+        document.getElementById('logLine').textContent =
+            name + ' 造成 ' + dmg + ' 点伤害！' + (defend ? '（已减伤）' : '');
+        refreshBattleUI();
+        updateHUD();
+        if (player.hp <= 0) {                                // 玩家死亡重开
+            document.getElementById('logLine').textContent = '你被击败了…按 R 重新开始';
+            restoreDefend();
+            return;
+        }
+        // 恢复可操作状态
+        restoreDefend();
+        document.getElementById('logLine').textContent = '选择你的行动！';
+    }, 600);
+}
+
+function restoreDefend() { defend = false; }
+
+/* =========================================================
+   键盘输入：WASD 移动 + 空格触发战斗 + R 重开
+   ========================================================= */
+// 防止空格键触发按钮重复/页面滚动
+document.addEventListener('keydown', e => {
+    const k = e.key.toLowerCase();
+    keys[k] = true;
+    // 空格：优先触发靠近的史莱姆，其次 Boss
+    if (k === ' ' && !battling) {
+        const near = slimes.find(nearSlime) || (boss && nearSlime(boss) ? boss : null);
+        if (near) { e.preventDefault(); startBattle(near); }
+    }
+    // Q：在地图释放火球术
+    if (k === 'q' && !battling) castFireball();
+    // Enter：站在洞穴入口(400,300)进洞穴；站在洞穴出口(656,272)返回地面
+    if (k === 'enter' && !battling) {
+        if (currentMap === 'grass' && nearWorld(400, 300)) enterCave();
+        else if (currentMap === 'cave' && nearWorld(20*tile+16, 8*tile+16)) exitCave();
+    }
+    // R 重新开始：胜利后 或 玩家死亡时
+    if (k === 'r' && !battling && (player.hp <= 0 || (!boss && slimes.length === 0))) {
+        resetGame();
+    }
+});
+document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+/* =========================================================
+   主循环：读键 -> 移动 -> 更新火球 -> 绘制 -> 刷新 HUD
+   ========================================================= */
+let lastTime = 0;
+function gameLoop(t) {
+    // 计算上一帧到本帧的时间差（秒），用于火球/冷却计时
+    const dt = lastTime ? Math.min(0.1, (t - lastTime) / 1000) : 0.016;
+    lastTime = t;
+
+    if (!battling) {                    // 战斗中冻结地图移动
+        const spd = 3;
+        if (keys['w']) { move(0, -spd); player.dirX = 0;  player.dirY = -1; }
+        if (keys['s']) { move(0,  spd); player.dirX = 0;  player.dirY =  1; }
+        if (keys['a']) { move(-spd, 0); player.dirX = -1; player.dirY = 0; }
+        if (keys['d']) { move( spd, 0); player.dirX = 1;  player.dirY = 0; }
+    }
+    updateFireball(dt);                 // 推进火球飞行与冷却计时
+    // 冷却动画帧数递减
+    if (explosion && explosion.ttl > 0) explosion.ttl--;
+    if (explosion && explosion.ttl <= 0) explosion = null;
+
+    // 每 4 秒自动存档一次，实时保存玩家进度
+    autoSaveTimer += dt;
+    if (autoSaveTimer >= 4) { autoSaveTimer = 0; saveGame(); }
+
+    draw();
+    updateHUD();
+    requestAnimationFrame(gameLoop);
+}
+
+// 自动存档倒计时（累积秒数）
+let autoSaveTimer = 0;
+
+/* =========================================================
+   重置游戏
+   ========================================================= */
+function resetGame() {
+    player = { x: 2*PIX, y: 2*PIX, lv: 1, hp: 100, maxHp: 100, mp: 50, maxMp: 50, atk: 10, xp: 0, xpNeed: 100, dirX: 1, dirY: 0 };
+    currentMap = 'grass';                                  // 回到地面世界
+    boss = null;
+    fireCool = 0; fireball = null; explosion = null;   // 重置火球状态
+    buildGrassMap();
+    spawnSlimes(5);
+    document.getElementById('winMsg').style.display = 'none';
+    updateHUD();
+}
+
+/* =========================================================
+   玩家存档：使用浏览器 localStorage 在本地保存游戏进度
+   ========================================================= */
+const SAVE_KEY = 'rpgMiniGameSave';
+
+// 保存存档（含玩家属性、地图数据、敌人与 Boss 状态）
+function saveGame() {
+    if (player.hp <= 0) return;                 // 死亡状态下不覆盖存档
+    const data = {
+        player: player,
+        currentMap: currentMap,
+        map: map,
+        slimes: slimes,
+        boss: boss,
+    };
+    try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+        savedFlash();                            // 弹出"已自动保存"提示
+    } catch (e) { /* 存储失败（隐私模式等）时静默忽略 */ }
+}
+
+// 读取存档并恢复到游戏状态；无存档时返回 false
+function loadGame() {
+    let d;
+    try { d = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) { return false; }
+    if (!d || !d.player || !d.map) return false;
+    player = d.player;
+    currentMap = d.currentMap;
+    map = d.map;
+    slimes = d.slimes || [];
+    boss = d.boss || null;
+    return true;
+}
+
+// 是否有可用存档（用于开始屏显示"继续冒险"）
+function hasSave() {
+    try { return !!localStorage.getItem(SAVE_KEY); } catch (e) { return false; }
+}
+
+// 短暂显示"已自动保存"文字
+let saveTipTimer = null;
+function savedFlash() {
+    const el = document.getElementById('saveTip');
+    el.style.opacity = '1';
+    clearTimeout(saveTipTimer);
+    saveTipTimer = setTimeout(() => { el.style.opacity = '0'; }, 1200);
+}
+
+/* =========================================================
+   进入界面 / 开始游戏
+   ========================================================= */
+let gameStarted = false;   // 是否已进入游戏（开始屏阶段为 false）
+
+// 进入游戏共用流程：隐藏开始屏并启动主循环
+function beginGame() {
+    gameStarted = true;
+    document.getElementById('startScreen').style.display = 'none';
+    updateHUD();
+    gameLoop();
+}
+
+// 开始新游戏：清除旧存档，从头开始
+function startNewGame() {
+    if (gameStarted) return;
+    try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+    resetGame();
+    beginGame();
+}
+
+// 继续冒险：读取存档接着玩（无存档则退回新游戏）
+function continueGame() {
+    if (gameStarted) return;
+    if (!loadGame()) { startNewGame(); return; }
+    fireCool = 0; fireball = null; explosion = null;   // 不保留临时飞弹状态
+    document.getElementById('winMsg').style.display = 'none';
+    beginGame();
+}
+
+// 战斗按钮监听
+document.getElementById('btnAttack').addEventListener('click', onAttack);
+document.getElementById('btnDefend').addEventListener('click', onDefend);
+document.getElementById('btnStart').addEventListener('click', startNewGame);
+document.getElementById('btnContinue').addEventListener('click', continueGame);
+
+// 开始屏初始化：有存档则显示"继续冒险"按钮
+if (hasSave()) document.getElementById('btnContinue').style.display = 'inline-block';
+
+// 尚未开始时按 Enter：有存档则继续，没存档则新建
+document.addEventListener('keydown', e => {
+    if (!gameStarted && e.key.toLowerCase() === 'enter') {
+        if (hasSave()) continueGame(); else startNewGame();
+    }
+});
+</script>
+</body>
+</html>
