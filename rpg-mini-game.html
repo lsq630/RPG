@@ -277,6 +277,143 @@
         color: #a09080;
         letter-spacing: 2px;
     }
+
+    /* 开始屏的存取入口小按钮 */
+    .saveShortcut { margin-top: 14px; display: flex; justify-content: center; gap: 12px; }
+    .saveShortcut button {
+        font-family: inherit;
+        font-size: 12px;
+        letter-spacing: 2px;
+        padding: 6px 16px;
+        background: #3a2c4a;
+        color: #d8c8e0;
+        border: 2px solid #6a4a8a;
+        cursor: pointer;
+    }
+    .saveShortcut button:hover { background: #4a3c5a; color: #fff; }
+
+    /* ============ 存档管理面板 ============ */
+    #savePanel {
+        position: absolute;
+        inset: 0;
+        z-index: 50;                       /* 覆盖所有层 */
+        display: none;
+        justify-content: center;
+        align-items: center;
+        background: rgba(5, 8, 5, 0.88);
+    }
+    #saveBox {
+        width: 460px;
+        background: #26211a;
+        border: 4px solid #8a6a3a;
+        padding: 20px 26px;
+        max-height: 92%;
+        overflow: auto;
+    }
+    #saveTitle { font-size: 22px; text-align: center; color: #ffd95e; letter-spacing: 4px; }
+    #saveSub { font-size: 12px; text-align: center; color: #a09080; margin: 8px 0 16px; }
+    .saveSec { margin-bottom: 16px; }
+    .saveHead { font-size: 14px; color: #e0d0b0; letter-spacing: 2px; margin-bottom: 6px; }
+    .saveSec textarea {
+        width: 100%;
+        box-sizing: border-box;
+        height: 70px;
+        background: #1a1612;
+        color: #7fbf7f;
+        font-family: Consolas, monospace;
+        font-size: 11px;
+        border: 2px solid #4a3620;
+        resize: vertical;
+        padding: 6px;
+    }
+    .saveBtns { display: flex; gap: 10px; margin-top: 8px; justify-content: center; }
+    .saveBtns button, #btnCloseSave {
+        font-family: inherit;
+        font-size: 13px;
+        letter-spacing: 2px;
+        padding: 8px 18px;
+        background: #4a3620;
+        color: #ffe9ae;
+        border: 2px solid #8a6a3a;
+        cursor: pointer;
+    }
+    .saveBtns button:hover, #btnCloseSave:hover { background: #6a4a28; color: #fff; }
+    #btnCloseSave { display: block; margin: 4px auto 0; }
+    #saveMsg { min-height: 18px; text-align: center; font-size: 13px; color: #7fbf7f; margin: 6px 0; }
+    #saveMsg.err { color: #ff9d7f; }
+
+    /* 拾取提示（短暂出现在 HUD 下方） */
+    #pickupMsg {
+        margin-top: 6px;
+        font-size: 12px;
+        color: #ffe9ae;
+        text-shadow: 0 1px 0 #000;
+        min-height: 16px;
+        transition: opacity .4s;
+        opacity: 0;
+    }
+
+    /* ============ 装备与背包面板 ============ */
+    #eqPanel {
+        position: absolute;
+        inset: 0;
+        z-index: 49;                       /* 略低于存档面板，高于战斗 */
+        display: none;
+        justify-content: center;
+        align-items: center;
+        background: rgba(5, 8, 5, 0.88);
+    }
+    #eqBox {
+        width: 420px;
+        background: #26211a;
+        border: 4px solid #8a6a3a;
+        padding: 18px 24px;
+        max-height: 92%;
+        overflow: auto;
+    }
+    #eqTitle { font-size: 20px; text-align: center; color: #ffd95e; letter-spacing: 3px; margin-bottom: 12px; }
+    #eqSlots .eqSlot {
+        font-size: 14px;
+        color: #e0d0b0;
+        padding: 8px 10px;
+        margin-bottom: 8px;
+        background: rgba(0,0,0,.35);
+        border: 2px solid #4a3620;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 26px;
+    }
+    #eqSlots .eqSlot span { flex: 1; }
+    .eqTip { font-size: 11px; color: #8a7a60; text-align: center; margin-bottom: 12px; }
+    .eqHead { font-size: 14px; color: #d8c8e0; margin: 10px 0 6px; }
+    #eqInvList { max-height: 180px; overflow: auto; }
+    .invRow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 10px;
+        background: rgba(0,0,0,.28);
+        border: 1px solid #3a2c1a;
+        margin-bottom: 5px;
+        font-size: 13px;
+        color: #e0d0b0;
+    }
+    .invRow .stat { color: #7fbf7f; margin-left: 8px; }
+    .invRow button, .eqSlot button, #btnCloseEq {
+        font-family: inherit;
+        font-size: 12px;
+        letter-spacing: 1px;
+        padding: 5px 14px;
+        background: #4a4a1e;
+        color: #ffe9ae;
+        border: 2px solid #8a8a3a;
+        cursor: pointer;
+    }
+    .invRow button:hover, .eqSlot button:hover, #btnCloseEq:hover { background: #6a6a2e; color: #fff; }
+    #btnCloseEq { display: block; margin: 12px auto 0; }
+    #eqMsg { min-height: 16px; text-align: center; font-size: 12px; color: #7fbf7f; margin-top: 6px; }
+    #eqInvList .empty { color: #8a7a60; text-align: center; padding: 12px; font-size: 13px; }
 </style>
 </head>
 <body>
@@ -293,11 +430,13 @@
         </div>
         <div>HP <b id="hudHp">100</b>/<b id="hudMaxHp">100</b></div>
         <div>MP <b id="hudMp">50</b>/<b id="hudMaxMp">50</b> <span id="hudCd" style="color:#ff9d5e"></span></div>
+        <div id="hudEquip" style="color:#c8b8d8; font-size:12px"></div>
         <div id="saveTip" style="color:#7fbf7f; font-size:11px; opacity:0; transition:opacity .4s">已自动保存</div>
         <div id="xpWrap">
             <div id="xpBar"></div>
             <div id="xpText"></div>
         </div>
+        <div id="pickupMsg"></div>
     </div>
 
     <!-- 回合制战斗面板 -->
@@ -324,7 +463,7 @@
     <div id="winMsg"><div id="winBox">🎉 胜利！Boss 被击败 🎉<br><small style="font-size:14px">按 R 重新开始</small></div></div>
 
     <!-- 底部提示 -->
-    <div id="hint">WASD 移动 | 敌人前按空格战斗 | Q 火球术(10MP/30伤/3s) | 紫色传送门处按 Enter 进洞穴 | 绿色门按 Enter 返回</div>
+    <div id="hint">WASD 移动 | 敌人前按空格战斗 | Q 火球术 | 紫门/绿门按 Enter 进出洞穴 | I 装备背包 | L 存取档 | R 重开</div>
 
     <!-- 进入界面：游戏未开始时展示 -->
     <div id="startScreen">
@@ -339,6 +478,7 @@
                 <div class="ctrlRow"><span class="key">空格</span><span class="desc">回合制战斗</span></div>
                 <div class="ctrlRow"><span class="key">Q</span><span class="desc">火球术（10MP / 30伤 / 3s冷却）</span></div>
                 <div class="ctrlRow"><span class="key">Enter</span><span class="desc">紫色传送门进洞穴 / 绿色门返回</span></div>
+                <div class="ctrlRow"><span class="key">I</span><span class="desc">装备与背包</span></div>
                 <div class="ctrlRow"><span class="key">R</span><span class="desc">重新开始</span></div>
             </div>
 
@@ -348,7 +488,63 @@
             <!-- 开始按钮 -->
             <button id="btnStart">开始冒险</button>
             <button id="btnContinue" style="display:none">继续冒险</button>
+            <div class="saveShortcut">
+                <button id="btnExportJump">导出存档码</button>
+                <button id="btnImportJump">导入存档码</button>
+            </div>
             <div id="startTip">或按 Enter 开始（有存档时 Enter 继续）</div>
+        </div>
+    </div>
+
+    <!-- 存档管理面板：跨浏览器导出 / 导入 -->
+    <div id="savePanel">
+        <div id="saveBox">
+            <div id="saveTitle">📼 存档管理</div>
+            <div id="saveSub">导出存档码或文件，到另一浏览器 / 设备导入即可续档</div>
+
+            <!-- 导出区 -->
+            <div class="saveSec">
+                <div class="saveHead">导出存档</div>
+                <textarea id="exportArea" readonly placeholder="点击下方「生成存档码」"></textarea>
+                <div class="saveBtns">
+                    <button id="btnMakeCode">生成存档码</button>
+                    <button id="btnCopyCode">复制</button>
+                    <button id="btnDlFile">下载 .sav</button>
+                </div>
+            </div>
+
+            <!-- 导入区 -->
+            <div class="saveSec">
+                <div class="saveHead">导入存档</div>
+                <textarea id="importArea" placeholder="粘贴从别处获得的存档码（或以粘贴方式填入 .sav 内容）"></textarea>
+                <div class="saveBtns">
+                    <button id="btnImport">导入存档</button>
+                </div>
+            </div>
+
+            <div id="saveMsg"></div>
+            <button id="btnCloseSave">关闭</button>
+        </div>
+    </div>
+
+    <!-- 装备与背包面板 -->
+    <div id="eqPanel">
+        <div id="eqBox">
+            <div id="eqTitle">⚒ 装备与背包 <small style="font-size:11px;color:#a09080">（按 I 呼出）</small></div>
+
+            <!-- 已装备栏 -->
+            <div id="eqSlots">
+                <div class="eqSlot">武器：<span id="eqWeapon"></span></div>
+                <div class="eqSlot">防具：<span id="eqArmor"></span></div>
+            </div>
+            <div class="eqTip">点击"卸下"或下方背包里的"装备"即可更换</div>
+
+            <!-- 背包列表 -->
+            <div class="eqHead">背包（<span id="eqCount">0</span>）</div>
+            <div id="eqInvList"></div>
+
+            <div id="eqMsg"></div>
+            <button id="btnCloseEq">关闭</button>
         </div>
     </div>
 </div>
@@ -379,7 +575,101 @@ let player = {
     atk: 10,
     xp: 0, xpNeed: 100,              // 升级所需经验
     dirX: 1, dirY: 0,                // 面向方向（决定火球术方向）
+    equip: { weapon: null, armor: null },  // 已装备：武器 / 防具
+    inventory: [],                         // 背包里的装备
 };
+
+/* =========================================================
+   装备系统
+   ========================================================= */
+// 装备图鉴：key -> 属性（type: weapon 加攻击 / armor 加最大HP）
+const ITEMS = {
+    iron_sword:    { type: 'weapon', name: '铁剑',     stat: 5,  desc: '攻击 +5' },
+    hero_sword:    { type: 'weapon', name: '勇者之剑', stat: 12, desc: '攻击 +12' },
+    leather_armor: { type: 'armor',  name: '皮甲',     stat: 15, desc: '最大HP +15' },
+    crystal_armor: { type: 'armor',  name: '水晶战甲', stat: 35, desc: '最大HP +35' },
+};
+
+// 有效攻击力 = 基础攻击 + 武器加成
+function effAtk() {
+    const w = player.equip && player.equip.weapon;
+    return player.atk + (w ? w.stat : 0);
+}
+
+// 装备一件武器/防具（自动穿上空缺槽位，否则放入背包）
+function addItem(key) {
+    const it = ITEMS[key];
+    const slot = it.type;
+    if (!player.equip[slot]) {
+        player.equip[slot] = it;                       // 槽位为空 → 直接穿上
+        if (slot === 'armor') {                        // 防具立即加最大/当前 HP
+            player.maxHp += it.stat;
+            player.hp += it.stat;
+        }
+        addPickup('装备 ' + it.name + ' ' + it.desc);
+    } else {
+        player.inventory.push(it);                     // 槽位已占用 → 先收进背包
+        addPickup('获得 ' + it.name + ' ' + it.desc);
+    }
+    updateHUD(); saveGame();
+}
+
+// 从背包下标装备
+function equipFromInventory(idx) {
+    const it = player.inventory[idx];
+    if (!it) return;
+    const slot = it.type;
+    const old = player.equip[slot];
+    if (old) {
+        player.inventory.push(old);                    // 旧装备退回背包
+        if (slot === 'armor') player.maxHp -= old.stat;
+    }
+    player.equip[slot] = it;
+    if (slot === 'armor') { player.maxHp += it.stat; player.hp += it.stat; }
+    player.hp = Math.min(player.hp, player.maxHp);
+    player.inventory.splice(idx, 1);
+    updateHUD(); saveGame();
+    renderEquipment(); addPickup('装备 ' + it.name + ' ' + it.desc);
+}
+
+// 卸下装备槽（放回背包）
+function unequip(slot) {
+    const it = player.equip[slot];
+    if (!it) return;
+    if (slot === 'armor') {
+        player.maxHp = Math.max(1, player.maxHp - it.stat);
+        player.hp = Math.min(player.hp, player.maxHp);
+    }
+    player.inventory.push(it);
+    player.equip[slot] = null;
+    updateHUD(); saveGame();
+    renderEquipment(); addPickup('卸下 ' + it.name);
+}
+
+// 短暂显示拾取/装备提示
+let pickupTimer = null;
+function addPickup(msg) {
+    const el = document.getElementById('pickupMsg');
+    el.textContent = msg;
+    el.style.opacity = '1';
+    clearTimeout(pickupTimer);
+    pickupTimer = setTimeout(() => { el.style.opacity = '0'; }, 2500);
+}
+
+// 敌人死亡掉落：Boss 必掉两件强力装备；普通敌人 50% 掉一件
+function giveEnemyLoot(type) {
+    if (type === 'boss') { addItem('hero_sword'); addItem('crystal_armor'); return; }
+    if (Math.random() < 0.5) {
+        const pool = (type === 'bat') ? ['leather_armor', 'iron_sword'] : ['iron_sword', 'leather_armor'];
+        addItem(pool[Math.floor(Math.random() * pool.length)]);
+    }
+}
+
+// 兼容旧存档：缺少装备字段时补齐默认值
+function normalizeEquipment() {
+    if (!player.equip) player.equip = { weapon: null, armor: null };
+    if (!Array.isArray(player.inventory)) player.inventory = [];
+}
 
 // 史莱姆敌人数组
 let slimes = [];
@@ -713,9 +1003,15 @@ function updateHUD() {
     document.getElementById('hudLv').textContent = player.lv;
     document.getElementById('hudHp').textContent = player.hp;
     document.getElementById('hudMaxHp').textContent = player.maxHp;
-    document.getElementById('hudAtk').textContent = player.atk;
+    document.getElementById('hudAtk').textContent = effAtk();
     document.getElementById('hudMp').textContent = player.mp;
     document.getElementById('hudMaxMp').textContent = player.maxMp;
+    // 装备栏显示（武器/防具及加成）
+    const w = player.equip && player.equip.weapon;
+    const a = player.equip && player.equip.armor;
+    document.getElementById('hudEquip').textContent =
+        '装：' + (w ? w.name + '[' + w.desc + ']' : '无武器')
+        + ' | ' + (a ? a.name + '[' + a.desc + ']' : '无防具');
     // 冷却剩余提示（仅冷却中显示）
     document.getElementById('hudCd').textContent = fireCool > 0 ? '冷却 ' + fireCool.toFixed(1) + 's' : '';
     const ratio = Math.min(1, player.xp / player.xpNeed) * 100;
@@ -786,11 +1082,13 @@ function endBattle(won) {
             slimes.splice(idx, 1);          // 地图上移除该史莱姆
             // 更强敌人奖励更多经验：蝙蝠 30，史莱姆 20
             gainXP(battling.type === 'bat' ? 30 : 20);
+            giveEnemyLoot(battling.type);    // 掉落装备
             // 若史莱姆已清光且尚无 Boss（仅在地面世界），则生成 Boss 关卡
             if (currentMap === 'grass' && slimes.length === 0 && !boss) spawnBoss();
         } else if (battling === boss) {     // 击败 Boss
             boss = null;
             gainXP(80);                     // 击败 Boss 奖励大量经验
+            giveEnemyLoot('boss');           // Boss 必掉强力装备
             document.getElementById('winMsg').style.display = 'flex';  // 胜利
         }
     }
@@ -830,7 +1128,8 @@ function explodeEnemies(ex, ey, damage, radius) {
             s.hp -= damage;
             if (s.hp <= 0) {
                 slimes.splice(i, 1);   // 火球直接消灭史莱姆 + 经验
-                gainXP(20);
+                gainXP(s.type === 'bat' ? 30 : 20);
+                giveEnemyLoot(s.type);  // 火球击杀同样掉落装备
             }
         }
     }
@@ -881,8 +1180,8 @@ let defend = false;          // 记录玩家本回合是否防御
 
 function onAttack() {
     if (!battling) return;
-    // ---- 我方回合：造成 8~15 浮动伤害 ----
-    const dmg = 8 + Math.floor(Math.random() * 8);           // 8-15
+    // ---- 我方回合：有效攻击力（含武器加成）+ 随机浮动伤害 ----
+    const dmg = effAtk() + Math.floor(Math.random() * 6);
     battling.hp -= dmg;
     let log = '你造成 ' + dmg + ' 点伤害！';
     if (battling.hp <= 0) {                                  // 击败敌人
@@ -938,6 +1237,8 @@ function restoreDefend() { defend = false; }
    ========================================================= */
 // 防止空格键触发按钮重复/页面滚动
 document.addEventListener('keydown', e => {
+    // 有面板打开时不响应游戏操作（空格/Q/Enter/R/移动）
+    if (panelsOpen()) return;
     const k = e.key.toLowerCase();
     keys[k] = true;
     // 空格：优先触发靠近的史莱姆，其次 Boss
@@ -968,7 +1269,7 @@ function gameLoop(t) {
     const dt = lastTime ? Math.min(0.1, (t - lastTime) / 1000) : 0.016;
     lastTime = t;
 
-    if (!battling) {                    // 战斗中冻结地图移动
+    if (!battling && !panelsOpen()) {   // 战斗中冻结移动；面板打开时也冻结
         const spd = 3;
         if (keys['w']) { move(0, -spd); player.dirX = 0;  player.dirY = -1; }
         if (keys['s']) { move(0,  spd); player.dirX = 0;  player.dirY =  1; }
@@ -996,7 +1297,7 @@ let autoSaveTimer = 0;
    重置游戏
    ========================================================= */
 function resetGame() {
-    player = { x: 2*PIX, y: 2*PIX, lv: 1, hp: 100, maxHp: 100, mp: 50, maxMp: 50, atk: 10, xp: 0, xpNeed: 100, dirX: 1, dirY: 0 };
+    player = { x: 2*PIX, y: 2*PIX, lv: 1, hp: 100, maxHp: 100, mp: 50, maxMp: 50, atk: 10, xp: 0, xpNeed: 100, dirX: 1, dirY: 0, equip: { weapon: null, armor: null }, inventory: [] };
     currentMap = 'grass';                                  // 回到地面世界
     boss = null;
     fireCool = 0; fireball = null; explosion = null;   // 重置火球状态
@@ -1033,6 +1334,7 @@ function loadGame() {
     try { d = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) { return false; }
     if (!d || !d.player || !d.map) return false;
     player = d.player;
+    normalizeEquipment();
     currentMap = d.currentMap;
     map = d.map;
     slimes = d.slimes || [];
@@ -1095,10 +1397,192 @@ if (hasSave()) document.getElementById('btnContinue').style.display = 'inline-bl
 
 // 尚未开始时按 Enter：有存档则继续，没存档则新建
 document.addEventListener('keydown', e => {
-    if (!gameStarted && e.key.toLowerCase() === 'enter') {
+    if (!gameStarted && document.getElementById('savePanel').style.display !== 'flex'
+        && e.key.toLowerCase() === 'enter') {
         if (hasSave()) continueGame(); else startNewGame();
     }
 });
+
+/* =========================================================
+   跨浏览器存档：导出 / 导入存档码
+   ========================================================= */
+const CODE_VERSION = 'RPG1';
+
+// 收集一份可序列化的存档数据（游戏中取当前状态；开始屏优先取已存存档）
+function collectSaveData() {
+    if (gameStarted) return { player, currentMap, map, slimes, boss };
+    let stored = null;
+    try { stored = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) {}
+    return stored || { player, currentMap, map, slimes, boss };
+}
+
+// 存档数据 -> 存档码（base64 + 校验和，便于跨浏览器搬运）
+function toCode(d) {
+    const utf8 = unescape(encodeURIComponent(JSON.stringify(d)));
+    let sum = 0;
+    for (let i = 0; i < utf8.length; i++) sum = (sum + utf8.charCodeAt(i)) & 0xff;
+    return CODE_VERSION + '_' + sum.toString(16).padStart(2, '0') + '_' + btoa(utf8);
+}
+
+// 存档码 -> 存档数据（校验失败返回 null）
+function fromCode(code) {
+    try {
+        const parts = String(code).trim().split('_');
+        if (parts.length < 3 || parts[0] !== CODE_VERSION) return null;
+        const bin = atob(parts.slice(2).join('_'));
+        let sum = 0;
+        for (let i = 0; i < bin.length; i++) sum = (sum + bin.charCodeAt(i)) & 0xff;
+        if (sum.toString(16).padStart(2, '0') !== parts[1]) return null;
+        const d = JSON.parse(decodeURIComponent(escape(bin)));
+        if (!d.player || !d.map) return null;
+        return d;
+    } catch (e) { return null; }
+}
+
+// 把一份存档应用到当前游戏并写入本地
+function applySave(d) {
+    player = d.player;
+    normalizeEquipment();
+    currentMap = d.currentMap;
+    map = d.map;
+    slimes = d.slimes || [];
+    boss = d.boss || null;
+    fireCool = 0; fireball = null; explosion = null;
+    document.getElementById('winMsg').style.display = 'none';
+    localStorage.setItem(SAVE_KEY, JSON.stringify(d));
+    document.getElementById('btnContinue').style.display = hasSave() ? 'inline-block' : 'none';
+    updateHUD();
+}
+
+// --- 面板工具 ---
+function openSavePanel() {
+    closeEqPanel();                          // 打开存档面板时收起装备面板
+    document.getElementById('savePanel').style.display = 'flex';
+    document.getElementById('exportArea').value = '';
+    setSaveMsg('', false);
+}
+function closeSavePanel() {
+    document.getElementById('savePanel').style.display = 'none';
+}
+function setSaveMsg(txt, isErr) {
+    const el = document.getElementById('saveMsg');
+    el.textContent = txt;
+    el.className = isErr ? 'err' : '';
+}
+
+// 生成存档码
+function makeCode() {
+    const code = toCode(collectSaveData());
+    document.getElementById('exportArea').value = code;
+    setSaveMsg('已生成存档码（长度 ' + code.length + '）', false);
+}
+// 复制存档码
+function copyCode() {
+    const el = document.getElementById('exportArea');
+    if (!el.value) { setSaveMsg('请先生成存档码', true); return; }
+    const done = () => setSaveMsg('已复制到剪贴板', false);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(el.value).then(done, () => fallbackCopy(el));
+    } else fallbackCopy(el);
+}
+function fallbackCopy(el) {
+    el.select(); el.setSelectionRange(0, 999999);
+    try { document.execCommand('copy'); setSaveMsg('已复制到剪贴板', false); }
+    catch (e) { setSaveMsg('复制失败，请手动复制', true); }
+}
+// 下载 .sav 文件
+function downloadFile() {
+    const el = document.getElementById('exportArea');
+    if (!el.value) { setSaveMsg('请先生成存档码', true); return; }
+    const blob = new Blob([el.value], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'rpg-mini-save.sav';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    setSaveMsg('已下载存档文件 rpg-mini-save.sav', false);
+}
+// 导入：从文本框恢复
+function doImport() {
+    const d = fromCode(document.getElementById('importArea').value);
+    if (!d) { setSaveMsg('存档码无效或已损坏', true); return; }
+    applySave(d);
+    setSaveMsg('导入成功！已写入本地存档', false);
+    document.getElementById('importArea').value = '';
+}
+
+// -- 面板与快捷键监听 --
+document.getElementById('btnMakeCode').addEventListener('click', makeCode);
+document.getElementById('btnCopyCode').addEventListener('click', copyCode);
+document.getElementById('btnDlFile').addEventListener('click', downloadFile);
+document.getElementById('btnImport').addEventListener('click', doImport);
+document.getElementById('btnCloseSave').addEventListener('click', closeSavePanel);
+document.getElementById('btnExportJump').addEventListener('click', openSavePanel);
+document.getElementById('btnImportJump').addEventListener('click', openSavePanel);
+// 游戏中按 L 呼出存取面板（非战斗中）
+document.addEventListener('keydown', e => {
+    if (gameStarted && e.key.toLowerCase() === 'l' && !battling) openSavePanel();
+});
+// 按 Escape 关闭面板
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeSavePanel(); closeEqPanel(); }
+});
+
+/* =========================================================
+   装备与背包面板（按 I 呼出）
+   ========================================================= */
+function panelsOpen() {
+    return document.getElementById('eqPanel').style.display === 'flex'
+        || document.getElementById('savePanel').style.display === 'flex';
+}
+
+function renderEquipment() {
+    const w = player.equip.weapon, a = player.equip.armor;
+    // 已装备栏：显示名称+加成，并提供"卸下"
+    document.getElementById('eqWeapon').innerHTML =
+        (w ? w.name + ' <span class="stat">' + w.desc + '</span>'
+              + ' <button onclick="unequip(\'weapon\')">卸下</button>' : '<i style="color:#8a7a60">暂无</i>');
+    document.getElementById('eqArmor').innerHTML =
+        (a ? a.name + ' <span class="stat">' + a.desc + '</span>'
+              + ' <button onclick="unequip(\'armor\')">卸下</button>' : '<i style="color:#8a7a60">暂无</i>');
+    // 背包列表
+    const list = document.getElementById('eqInvList');
+    document.getElementById('eqCount').textContent = player.inventory.length;
+    if (player.inventory.length === 0) {
+        list.innerHTML = '<div class="empty">背包空空如也，去击败敌人收集装备吧！</div>';
+        return;
+    }
+    list.innerHTML = '';
+    player.inventory.forEach((it, i) => {
+        const row = document.createElement('div');
+        row.className = 'invRow';
+        row.innerHTML = '<span>' + it.name + '<span class="stat">' + (it.type === 'weapon' ? '⚔' : '🛡') + ' ' + it.desc + '</span></span>'
+                      + '<button onclick="equipFromInventory(' + i + ')">装备</button>';
+        list.appendChild(row);
+    });
+}
+
+function openEqPanel() {
+    closeSavePanel();                    // 打开装备面板时收起存档面板
+    document.getElementById('eqPanel').style.display = 'flex';
+    document.getElementById('eqMsg').textContent = '';
+    renderEquipment();
+}
+function closeEqPanel() {
+    document.getElementById('eqPanel').style.display = 'none';
+}
+function toggleEqPanel() {
+    if (document.getElementById('eqPanel').style.display === 'flex') closeEqPanel();
+    else openEqPanel();
+}
+// I 键呼出装备面板（游戏中、非战斗、存档面板未打开时）
+document.addEventListener('keydown', e => {
+    if (e.key.toLowerCase() === 'i' && gameStarted && !battling
+        && document.getElementById('savePanel').style.display !== 'flex') {
+        toggleEqPanel();
+    }
+});
+document.getElementById('btnCloseEq').addEventListener('click', closeEqPanel);
 </script>
 </body>
 </html>
