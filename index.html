@@ -30,16 +30,18 @@
     /* ============ 顶部 HUD 状态栏 ============ */
     #hud {
         position: absolute;                  /* 覆盖在游戏画面左上角 */
-        top: 8px;
-        left: 8px;
-        background: rgba(20, 15, 8, 0.85);
-        border: 3px solid #7a5a2e;
-        padding: 8px 12px;
-        font-size: 13px;
-        line-height: 1.5;
+        top: 6px;
+        left: 6px;
+        background: rgba(16, 12, 6, 0.55);   /* 更通透，减少遮挡 */
+        border: 2px solid #7a5a2e;
+        padding: 5px 10px;
+        font-size: 12px;
+        line-height: 1.4;
         z-index: 10;
         user-select: none;
-        min-width: 190px;
+        pointer-events: none;                /* 不拦截鼠标，避免挡操作 */
+        min-width: 168px;
+        backdrop-filter: blur(1px);          /* 轻微毛玻璃，兼顾可读性 */
     }
     #hud b { color: #ffd95e; }              /* 数值高亮 */
     #hudRow1 { display: flex; justify-content: space-between; gap: 20px; }
@@ -135,6 +137,53 @@
         min-height: 18px;
         color: #ffd95e;
         font-size: 14px;
+    }
+    /* 战报着色：普攻/大招/治疗 */
+    #logLine.log-dmg     { color: #ffe9ae; }
+    #logLine.log-dmg-big { color: #ffd000; font-weight: bold; font-size: 15px; }
+    #logLine.log-heal    { color: #7fbf7f; }
+    #logLine.log-enemy   { color: #ff9d7f; }
+
+    /* 韧性条：更细、金黄色 */
+    .hpTrack.thin { height: 10px; }
+    .trow { margin: 6px 0; }
+
+    /* 大招区 */
+    #ultWrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    #ultBarWrap {
+        height: 10px; width: 120px;
+        background: #2a2026;
+        border: 2px solid #4a3620;
+    }
+    #ultFill {
+        height: 100%; width: 0%;
+        background: linear-gradient(180deg, #ffd95e, #ff7d2e);
+        transition: width .25s;
+    }
+    #btnUlt:disabled { opacity: .45; cursor: not-allowed; }
+    #btnUlt:not(:disabled):hover { background: #8a4a1e; }
+
+    /* 暴击/大招的震屏与红色闪光 */
+    #battleBox.shake { animation: battleShake .4s; }
+    @keyframes battleShake {
+        0%,100% { transform: translate(0,0); }
+        20% { transform: translate(-8px, 4px); }
+        40% { transform: translate(7px, -5px); }
+        60% { transform: translate(-5px, 3px); }
+        80% { transform: translate(4px, -2px); }
+    }
+    #flashOverlay {
+        position: absolute;
+        inset: 0;
+        z-index: 38;
+        pointer-events: none;
+        opacity: 0;
+        background: radial-gradient(circle, rgba(255,255,255,0) 30%, rgba(255,50,30,0.55) 100%);
+    }
+    #flashOverlay.on { animation: critFlash .35s; }
+    @keyframes critFlash {
+        0% { opacity: .95; }
+        100% { opacity: 0; }
     }
 
     /* 获胜浮层提示 */
@@ -372,47 +421,61 @@
         overflow: auto;
     }
     #eqTitle { font-size: 20px; text-align: center; color: #ffd95e; letter-spacing: 3px; margin-bottom: 12px; }
-    #eqSlots .eqSlot {
-        font-size: 14px;
+    #eqSlotRow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .eqSlot {
+        font-size: 13px;
         color: #e0d0b0;
-        padding: 8px 10px;
-        margin-bottom: 8px;
-        background: rgba(0,0,0,.35);
-        border: 2px solid #4a3620;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        min-height: 26px;
+        padding: 6px 8px;
+        background: rgba(0,0,0,.38);
+        border: 2px dashed #4a3620;      /* 虚线框提示为拖放位 */
+        border-radius: 4px;
+        min-height: 60px;
+        display: block;
+        text-align: center;
+        transition: border-color .15s, background .15s;
     }
-    #eqSlots .eqSlot span { flex: 1; }
-    .eqTip { font-size: 11px; color: #8a7a60; text-align: center; margin-bottom: 12px; }
-    .eqHead { font-size: 14px; color: #d8c8e0; margin: 10px 0 6px; }
-    #eqInvList { max-height: 180px; overflow: auto; }
-    .invRow {
+    .eqSlot .slotLabel { display: block; font-size: 11px; color: #8a7a60; letter-spacing: 2px; margin-bottom: 4px; }
+    .eqSlot .slotBody { display: block; color: #e0d0b0; }
+    .eqSlot.dragHover { border-color: #ffd95e; background: rgba(255,217,94,.12); }
+    #eqInvList.dragHover { outline: 2px dashed #7fbf7f; outline-offset: 2px; }
+    .eqTip { font-size: 11px; color: #8a7a60; text-align: center; margin: 8px 0 10px; }
+    .eqHead { font-size: 14px; color: #d8c8e0; margin: 8px 0 6px; }
+    #eqInvList { max-height: 200px; overflow: auto; min-height: 40px; transition: outline-color .15s; }
+    .invCard {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 6px 10px;
+        padding: 7px 10px;
         background: rgba(0,0,0,.28);
         border: 1px solid #3a2c1a;
         margin-bottom: 5px;
         font-size: 13px;
         color: #e0d0b0;
+        cursor: grab;
+        user-select: none;               /* 拖拽时防止选中文案 */
+        border-radius: 3px;
     }
-    .invRow .stat { color: #7fbf7f; margin-left: 8px; }
-    .invRow button, .eqSlot button, #btnCloseEq {
-        font-family: inherit;
-        font-size: 12px;
-        letter-spacing: 1px;
-        padding: 5px 14px;
-        background: #4a4a1e;
+    .invCard:active { cursor: grabbing; }
+    .invCard:hover { border-color: #8a6a3a; }
+    .invCard .stat { color: #7fbf7f; margin-left: 8px; }
+    .eqItem {
+        display: inline-block;
+        margin: 2px 0;
+        padding: 4px 10px;
+        background: #3a2c1a;
+        border: 1px solid #8a6a3a;
+        border-radius: 3px;
         color: #ffe9ae;
-        border: 2px solid #8a8a3a;
-        cursor: pointer;
+        font-size: 13px;
+        cursor: grab;
+        user-select: none;
     }
-    .invRow button:hover, .eqSlot button:hover, #btnCloseEq:hover { background: #6a6a2e; color: #fff; }
-    #btnCloseEq { display: block; margin: 12px auto 0; }
+    .eqItem:active { cursor: grabbing; }
+    .eqItem .stat { color: #7fbf7f; }
+    .eqEmpty { color: #6a5a48; font-size: 12px; }
+    #btnCloseEq { display: block; margin: 14px auto 0; }
     #eqMsg { min-height: 16px; text-align: center; font-size: 12px; color: #7fbf7f; margin-top: 6px; }
+    #eqMsg.err { color: #ff9d7f; }
     #eqInvList .empty { color: #8a7a60; text-align: center; padding: 12px; font-size: 13px; }
 </style>
 </head>
@@ -422,6 +485,9 @@
     <!-- 画布：800x600 的草地地图 -->
     <canvas id="game" width="800" height="600"></canvas>
 
+    <!-- 暴击/大招时的红色闪光浮层 -->
+    <div id="flashOverlay"></div>
+
     <!-- 左上角 HUD：等级 / HP / 攻击力 / 经验条 -->
     <div id="hud">
         <div id="hudRow1">
@@ -429,7 +495,7 @@
             <span>攻击 <b id="hudAtk">10</b></span>
         </div>
         <div>HP <b id="hudHp">100</b>/<b id="hudMaxHp">100</b></div>
-        <div>MP <b id="hudMp">50</b>/<b id="hudMaxMp">50</b> <span id="hudCd" style="color:#ff9d5e"></span></div>
+        <div>MP <b id="hudMp">50</b>/<b id="hudMaxMp">50</b> <span id="hudCd" style="color:#ff9d5e"></span> ⚡<b id="hudEnergy">0</b></div>
         <div id="hudEquip" style="color:#c8b8d8; font-size:12px"></div>
         <div id="saveTip" style="color:#7fbf7f; font-size:11px; opacity:0; transition:opacity .4s">已自动保存</div>
         <div id="xpWrap">
@@ -447,6 +513,11 @@
                 <div class="label"><span id="enemyName">史莱姆</span><span id="enemyHpTxt">20/20</span></div>
                 <div class="hpTrack"><div class="hpFill" id="enemyHpFill"></div></div>
             </div>
+            <!-- 韧性条：削空即破盾眩晕 -->
+            <div class="hpRow trow">
+                <div class="label"><span style="color:#c8c8c8">韧性</span><span id="enemyToughTxt">4/4</span></div>
+                <div class="hpTrack thin"><div class="hpFill" id="enemyToughFill" style="background:linear-gradient(180deg,#fff8d0,#c8b050)"></div></div>
+            </div>
             <div class="hpRow">
                 <div class="label"><span>勇者</span><span id="heroHpTxt"></span></div>
                 <div class="hpTrack"><div class="hpFill" id="heroHpFill"></div></div>
@@ -454,6 +525,11 @@
             <div id="battleBtns">
                 <button id="btnAttack">攻击</button>
                 <button id="btnDefend">防御</button>
+                <!-- 大招：普攻/受击攒能量，满 100 可释放 -->
+                <div id="ultWrap">
+                    <div id="ultBarWrap"><div id="ultFill"></div></div>
+                    <button id="btnUlt" disabled>🔥 大招(<span id="ultTxt">0</span>/100)</button>
+                </div>
             </div>
             <div id="logLine">选择你的行动！</div>
         </div>
@@ -476,6 +552,7 @@
             <div id="startControls">
                 <div class="ctrlRow"><span class="key">W A S D</span><span class="desc">移动</span></div>
                 <div class="ctrlRow"><span class="key">空格</span><span class="desc">回合制战斗</span></div>
+                <div class="ctrlRow"><span class="key">破盾/大招</span><span class="desc">打空敌人韧性破盾眩晕 · 战斗内攒能量放🔥大招</span></div>
                 <div class="ctrlRow"><span class="key">Q</span><span class="desc">火球术（10MP / 30伤 / 3s冷却）</span></div>
                 <div class="ctrlRow"><span class="key">Enter</span><span class="desc">紫色传送门进洞穴 / 绿色门返回</span></div>
                 <div class="ctrlRow"><span class="key">I</span><span class="desc">装备与背包</span></div>
@@ -533,11 +610,11 @@
             <div id="eqTitle">⚒ 装备与背包 <small style="font-size:11px;color:#a09080">（按 I 呼出）</small></div>
 
             <!-- 已装备栏 -->
-            <div id="eqSlots">
-                <div class="eqSlot">武器：<span id="eqWeapon"></span></div>
-                <div class="eqSlot">防具：<span id="eqArmor"></span></div>
+            <div id="eqSlotRow">
+                <div class="eqSlot" data-slot="weapon"><span class="slotLabel">武器</span><span id="eqWeapon" class="slotBody"></span></div>
+                <div class="eqSlot" data-slot="armor"><span class="slotLabel">防具</span><span id="eqArmor" class="slotBody"></span></div>
             </div>
-            <div class="eqTip">点击"卸下"或下方背包里的"装备"即可更换</div>
+            <div class="eqTip">← 拖拽装备到这里装备 | 拖回下方背包区卸下 →</div>
 
             <!-- 背包列表 -->
             <div class="eqHead">背包（<span id="eqCount">0</span>）</div>
@@ -568,10 +645,11 @@ let currentMap = 'grass';
 
 // 玩家对象
 let player = {
-    x: 2 * PIX, y: 2 * PIX,          // 出生位置（格 2,2）
+    x: 12 * PIX, y: 12 * PIX,          // 出生位置（中下方，避开 HUD）
     lv: 1,
     hp: 100, maxHp: 100,
     mp: 50, maxMp: 50,               // 法力值（火球术消耗）
+    energy: 0,                       // 大招能量（战斗中普攻/受击积攒，满 100 可放大招）
     atk: 10,
     xp: 0, xpNeed: 100,              // 升级所需经验
     dirX: 1, dirY: 0,                // 面向方向（决定火球术方向）
@@ -669,6 +747,22 @@ function giveEnemyLoot(type) {
 function normalizeEquipment() {
     if (!player.equip) player.equip = { weapon: null, armor: null };
     if (!Array.isArray(player.inventory)) player.inventory = [];
+    if (player.energy == null) player.energy = 0;          // 兼容旧档：无大招能量
+    if (!Array.isArray(slimes)) slimes = [];
+}
+
+// 兼容旧存档：补齐敌人 AI 与韧性条字段
+function normalizeEnemies() {
+    const fix = (e, isBoss) => {
+        if (!e) return;
+        if (!e.ai) e.ai = isBoss ? 'boss' : e.type === 'bat' ? 'critter' : 'normal';
+        if (e.tough == null || e.toughMax == null) {
+            e.toughMax = isBoss ? 10 : e.type === 'bat' ? 6 : 4;
+            e.tough    = e.toughMax;
+        }
+    };
+    slimes.forEach(s => fix(s, false));
+    fix(boss, true);
 }
 
 // 史莱姆敌人数组
@@ -708,6 +802,9 @@ function buildGrassMap() {
     }
     // 洞穴入口（中心 400,300 所在格）保持空地，便于走近触发
     map[9][12] = 0;
+    // 玩家出生区(12,12)附近强制清空，避免开局被左上角 HUD 或障碍遮挡
+    for (let yy = 11; yy <= 13; yy++)
+        for (let xx = 11; xx <= 13; xx++) map[yy][xx] = 0;
     // 四周围墙采用石头，防止走出地图
     for (let x = 0; x < MAP_W; x++) { map[0][x] = 2; map[MAP_H-1][x] = 2; }
     for (let y = 0; y < MAP_H; y++) { map[y][0] = 2; map[y][MAP_W-1] = 2; }
@@ -729,6 +826,9 @@ function buildCaveMap() {
     }
     for (let x = 0; x < MAP_W; x++) { map[0][x] = 2; map[MAP_H-1][x] = 2; }
     for (let y = 0; y < MAP_H; y++) { map[y][0] = 2; map[y][MAP_W-1] = 2; }
+    // 洞穴出生区(4,9)附近清空，避免一进洞就被 HUD 遮挡或卡在障碍里
+    for (let yy = 8; yy <= 10; yy++)
+        for (let xx = 3; xx <= 5; xx++) map[yy][xx] = 0;
 }
 
 /* =========================================================
@@ -742,14 +842,20 @@ function spawnSlimes(count) {
         const gx = 2 + Math.floor(Math.random() * (MAP_W - 4));
         const gy = 2 + Math.floor(Math.random() * (MAP_H - 4));
         if (map[gy][gx] !== 0) continue;
-        if (Math.abs(gx - 2) + Math.abs(gy - 2) < 6) continue;
+        if (Math.abs(gx - 12) + Math.abs(gy - 12) < 6) continue;  // 离玩家出生点远些
         // 距洞穴入口(12,9)远一些，避免出生即遇怪
         if (Math.abs(gx - 12) + Math.abs(gy - 9) < 4) continue;
         let tooClose = slimes.some(s => Math.abs(s.gx-gx)+Math.abs(s.gy-gy) < 3);
         if (tooClose) continue;
-        slimes.push({ gx, gy, type: 'slime', hp: 20, maxHp: 20 });
+        slimes.push({ gx, gy, type: 'slime', hp: 20, maxHp: 20, ai: rollSlimeAI(), tough: 4, toughMax: 4 });
         placed++;
     }
+}
+
+// 史莱姆的行为分化：标准 / 治疗 / 铁壁
+function rollSlimeAI() {
+    const r = Math.random();
+    return r < 0.55 ? 'normal' : (r < 0.80 ? 'healer' : 'defender');
 }
 
 /* =========================================================
@@ -763,10 +869,10 @@ function spawnBats(count) {
         const gx = 2 + Math.floor(Math.random() * (MAP_W - 4));
         const gy = 2 + Math.floor(Math.random() * (MAP_H - 4));
         if (map[gy][gx] !== 0) continue;
-        if (Math.abs(gx - 2) + Math.abs(gy - 2) < 5) continue;   // 离洞穴入口远些
+        if (Math.abs(gx - 4) + Math.abs(gy - 9) < 5) continue;   // 离洞穴出生区远些
         let tooClose = slimes.some(s => Math.abs(s.gx-gx)+Math.abs(s.gy-gy) < 2);
         if (tooClose) continue;
-        slimes.push({ gx, gy, type: 'bat', hp: 35, maxHp: 35 }); // 蝙蝠更抗打
+        slimes.push({ gx, gy, type: 'bat', hp: 35, maxHp: 35, ai: 'critter', tough: 6, toughMax: 6 }); // 蝙蝠更抗打、爱暴击
         placed++;
     }
 }
@@ -785,7 +891,7 @@ function enterCave() {
     boss = null;                            // 洞穴里没有 Boss 关卡
     buildCaveMap();
     spawnBats(6);                           // 洞穴刷新 6 只更强蝙蝠
-    player.x = 2 * PIX; player.y = 2 * PIX; // 出生在洞穴入口
+    player.x = 4 * PIX; player.y = 9 * PIX; // 出生在洞穴开阔区（避开 HUD）
     fireball = null; explosion = null;      // 清掉可能存在的飞弹
     saveGame();                             // 切换地图后存档
 }
@@ -830,7 +936,7 @@ function spawnBoss() {
         if (map[gy][gx] !== 0) continue;
         if (Math.abs(gx*tile - player.x) + Math.abs(gy*tile - player.y) < 200) continue;
         const hpScale = bossMaxHp();       // 用动态公式计算初始血量
-        boss = { gx, gy, hp: hpScale, maxHp: hpScale };
+        boss = { gx, gy, hp: hpScale, maxHp: hpScale, ai: 'boss', tough: 10, toughMax: 10 };
         return;
     }
 }
@@ -938,6 +1044,7 @@ function draw() {
             ctx.fillStyle = '#000'; ctx.fillRect(X+11, Y+13, 4, 4); ctx.fillRect(X+19, Y+13, 4, 4);
             ctx.fillStyle = '#ccffcc'; ctx.beginPath(); ctx.arc(X+12, Y+8, 3, 0, Math.PI*2); ctx.fill();
         }
+        drawEnemySigil(X, Y, s.ai);   // 头上小图标标识 AI 类型
     }
 
     // ---- 3.5) Boss（仅地面世界，暗紫色大史莱姆）----
@@ -948,6 +1055,7 @@ function draw() {
         ctx.beginPath(); ctx.arc(X+16, Y+22, 15, 0, Math.PI); ctx.fill();
         ctx.fillStyle = '#000'; ctx.fillRect(X+9, Y+11, 5, 5); ctx.fillRect(X+19, Y+11, 5, 5);
         ctx.fillStyle = '#e0c6ff'; ctx.beginPath(); ctx.arc(X+11, Y+6, 4, 0, Math.PI*2); ctx.fill();
+        drawEnemySigil(X, Y, boss.ai);   // Boss 王冠标识
     }
 
     // ---- 3.9) 火球术：飞行火球 + 爆炸效果 ----
@@ -984,6 +1092,24 @@ function draw() {
     }
 }
 
+// 敌人头上 AI 类型小图标（治疗✚ / 铁壁盾牌 / 狂暴闪电 / Boss 王冠）
+function drawEnemySigil(X, Y, ai) {
+    const cx = X + 23, cy = Y + 2;
+    if (ai === 'healer') {
+        ctx.fillStyle = '#7fbf7f'; ctx.font = '10px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('✚', cx, cy + 10);
+    } else if (ai === 'defender') {
+        ctx.fillStyle = '#b8b8c8'; ctx.fillRect(cx - 4, cy + 1, 8, 7);
+    } else if (ai === 'critter') {
+        ctx.fillStyle = '#ffd000';
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + 5, cy + 7); ctx.lineTo(cx - 5, cy + 7); ctx.closePath(); ctx.fill();
+    } else if (ai === 'boss') {
+        ctx.fillStyle = '#ffd95e'; ctx.font = '12px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('♛', cx, cy + 11);
+    }
+    ctx.textAlign = 'left';
+}
+
 // 画一个发光的传送门标记（用于洞穴入口 / 出口）
 function drawPortal(x, y, color) {
     ctx.fillStyle = color;
@@ -1006,6 +1132,7 @@ function updateHUD() {
     document.getElementById('hudAtk').textContent = effAtk();
     document.getElementById('hudMp').textContent = player.mp;
     document.getElementById('hudMaxMp').textContent = player.maxMp;
+    document.getElementById('hudEnergy').textContent = Math.min(PLAYER_MAX_ENERGY, player.energy);
     // 装备栏显示（武器/防具及加成）
     const w = player.equip && player.equip.weapon;
     const a = player.equip && player.equip.armor;
@@ -1056,22 +1183,65 @@ function nearSlime(s) {
    ========================================================= */
 function startBattle(s) {
     battling = s;
+    // 重置本场战斗的临时状态
+    enemyBroken = false; bonusTurn = false; combo = 0; effCombo = 0; defend = false;
     updateHUD();
     refreshBattleUI();
+    setBattleLog('战斗开始！选择你的行动！', '');
     document.getElementById('battlePanel').style.display = 'flex';
 }
 
 /* 刷新型战斗面板 HP 数值与进度条 */
 function refreshBattleUI() {
-    // 根据对手类型显示名称：Boss / 蝙蝠 / 史莱姆
-    let name = '史莱姆';
-    if (battling === boss) name = 'Boss 史莱姆王';
-    else if (battling.type === 'bat') name = '蝙蝠';
-    document.getElementById('enemyName').textContent = name;
+    // 根据对手类型显示名称 + 行为标签
+    document.getElementById('enemyName').textContent = enemyName(battling);
     document.getElementById('enemyHpTxt').textContent = battling.hp + '/' + battling.maxHp;
     document.getElementById('enemyHpFill').style.width = (battling.hp / battling.maxHp * 100) + '%';
+    // 韧性条
+    document.getElementById('enemyToughTxt').textContent = Math.max(0, battling.tough) + '/' + battling.toughMax;
+    document.getElementById('enemyToughFill').style.width = (battling.tough / battling.toughMax * 100) + '%';
     document.getElementById('heroHpTxt').textContent = player.hp + '/' + player.maxHp;
     document.getElementById('heroHpFill').style.width = (player.hp / player.maxHp * 100) + '%';
+    // 大招能量条与按钮启用状态
+    document.getElementById('ultTxt').textContent = Math.min(PLAYER_MAX_ENERGY, player.energy);
+    document.getElementById('ultFill').style.width = (Math.min(PLAYER_MAX_ENERGY, player.energy) / PLAYER_MAX_ENERGY * 100) + '%';
+    document.getElementById('btnUlt').disabled = player.energy < PLAYER_MAX_ENERGY;
+}
+
+/* 敌人显示名：Boss / 蝙蝠 / 史莱姆 + 行为标签 */
+function enemyName(e) {
+    let nm = (e === boss) ? 'Boss 史莱姆王' : (e.type === 'bat' ? '蝙蝠' : '史莱姆');
+    return nm + ' [ ' + enemyTag(e) + ' ]';
+}
+// 行为标签文案
+function enemyTag(e) {
+    switch (e.ai) {
+        case 'healer':   return '治疗';
+        case 'defender': return '铁壁';
+        case 'critter':  return '狂暴';
+        case 'boss':     return '王者';
+        default:         return '标准';
+    }
+}
+// 敌人基础伤害（含类型加成）
+function enemyBaseDmg(e) {
+    let base = 6 + Math.floor(Math.random() * 5);   // 6-10
+    if (e === boss) base += 8;                       // Boss 更凶
+    else if (e.type === 'bat') base += 4;            // 蝙蝠更强
+    return base;
+}
+/* 暴击/大招时的震屏 + 红色闪光 */
+function juiceCrit() {
+    const box = document.getElementById('battleBox');
+    box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
+    const f = document.getElementById('flashOverlay');
+    f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
+}
+/* 设置战报并着色 */
+function setBattleLog(txt, cls) {
+    const el = document.getElementById('logLine');
+    el.className = 'log-' + (cls || '');
+    el.textContent = txt;
 }
 
 /* 结束战斗并移除被击败的史莱姆 */
@@ -1094,6 +1264,7 @@ function endBattle(won) {
     }
     battling = null;
     document.getElementById('battlePanel').style.display = 'none';
+    enemyBroken = false; bonusTurn = false; combo = 0; effCombo = 0; defend = false;
     saveGame();                              // 战斗结束后立即存档
 }
 
@@ -1177,57 +1348,190 @@ function songDidFireTravelFar() {
    战斗回合逻辑（同时处理敌人回合）
    ========================================================= */
 let defend = false;          // 记录玩家本回合是否防御
+const PLAYER_MAX_ENERGY = 100;   // 大招能量上限
+let enemyBroken = false;     // 敌人当前处于破盾状态（受击 +50% 伤害）
+let bonusTurn = false;       // 破盾后玩家是否拥有一次额外追击回合
+let combo = 0, effCombo = 0; // 连击计数（防御会清零）
+let chargeHit = false;       // 本击是否来自蓄力重击（用于震屏提示）
 
+/* 我方普通攻击 */
 function onAttack() {
     if (!battling) return;
-    // ---- 我方回合：有效攻击力（含武器加成）+ 随机浮动伤害 ----
-    const dmg = effAtk() + Math.floor(Math.random() * 6);
-    battling.hp -= dmg;
-    let log = '你造成 ' + dmg + ' 点伤害！';
-    if (battling.hp <= 0) {                                  // 击败敌人
-        log += (battling === boss) ? ' 史莱姆王被击败！' :
-               (battling.type === 'bat' ? ' 蝙蝠被击败！' : ' 史莱姆被击败！');
-        refreshBattleUI();
-        setTimeout(() => { afterPlayerTurn(false, log); }, 500);
-    } else {
-        refreshBattleUI();
-        setTimeout(() => { afterPlayerTurn(true, log); }, 500);
-    }
+    const e = battling;
+    const isBonus = bonusTurn; bonusTurn = false;   // 是否在破盾追击回合
+    const guard = e.guarding; e.guarding = false;   // 敌人"铁壁"带来的格挡
+
+    // 削减韧性；归零即破盾
+    const broke = reduceToughness(e);
+    if (broke) enemyBroken = true;
+
+    // 伤害倍率 = 破盾 × 连击；另有 10% 暴击
+    combo++;
+    effCombo = Math.min(6, combo);
+    let mult = (enemyBroken ? 1.5 : 1) * (1 + Math.max(0, effCombo - 1) * 0.1);
+    const crit = Math.random() < 0.10;
+    let dmg = Math.round((effAtk() + Math.floor(Math.random() * 6)) * mult);
+    if (crit) dmg = Math.round(dmg * 1.6);
+    if (guard) dmg = Math.floor(dmg * 0.5);
+
+    // 普攻累积大招能量
+    player.energy = Math.min(PLAYER_MAX_ENERGY, player.energy + 25);
+
+    let log = '你造成 ' + dmg + ' 点伤害' + (crit ? '（暴击！）' : '')
+            + (enemyBroken ? '（破盾+50%）' : '') + '（连击 x' + effCombo + '）！';
+    if (guard) log += '（被敌人格挡减半）';
+    if (crit) juiceCrit();
+    resolvePlayerHit({ dmg, broke, isBonus, log: log, big: criticised() });
 }
 
+/* 防御：本回合减伤 50%，打断连击 */
 function onDefend() {
     if (!battling) return;
-    defend = true;                                           // 本回合减伤 50%
-    afterPlayerTurn(true, '你采取了防御姿态！');
+    const isBonus = bonusTurn; bonusTurn = false;
+    defend = true;
+    combo = 0; effCombo = 0;                         // 防御打断连击
+    if (isBonus) { enemyBroken = false; battling.tough = battling.toughMax; } // 追击后敌人清醒
+    setBattleLog('你采取防御姿态，本回合减伤 50%！', 'heal');
+    afterPlayerTurn(true, '你采取防御姿态！');
 }
 
-/* 我方回合结束后，进入敌人回合 */
+/* 大招：积满 100 能量释放，高伤 + 强力破盾（可追击），并触发震屏闪光 */
+function onUlt() {
+    if (!battling || player.energy < PLAYER_MAX_ENERGY) return;
+    const e = battling;
+    const isBonus = bonusTurn; bonusTurn = false;
+    player.energy = 0;
+    const dmg = Math.round((effAtk() * 2) + 25);
+
+    // 大招强力破盾（几乎必破）
+    const broke = !enemyBroken;
+    if (broke) { e.tough = 0; enemyBroken = true; }
+
+    // 大招也算连击
+    combo++;
+    effCombo = Math.min(6, combo);
+    let log = '🔥 你释放大招！造成 ' + dmg + ' 点伤害' + (enemyBroken ? '（破盾+50%）' : '') + '！';
+    juiceCrit();
+    resolvePlayerHit({ dmg, broke, isBonus, log: log, big: true });
+}
+
+// 是否为"大数字"（大招/连击高）用于着色
+function criticised() { return effCombo >= 3; }
+
+/* 削减韧性：返回本次攻击是否刚好把韧性打空（破盾） */
+function reduceToughness(e) {
+    if (e.tough > 0) {
+        e.tough -= 2;
+        if (e.tough <= 0) { e.tough = 0; return true; }
+    }
+    return false;
+}
+
+/* 统一结算"我方命中后"的走向：击杀 / 破盾追击 / 进入敌人回合 */
+function resolvePlayerHit(hit) {
+    const e = battling;
+    e.hp -= hit.dmg;
+    refreshBattleUI();
+    updateHUD();
+    // 击败敌人
+    if (e.hp <= 0) {
+        hit.log += (e === boss) ? ' 史莱姆王被击败！' :
+                   (e.type === 'bat' ? ' 蝙蝠被击败！' : ' 史莱姆被击败！');
+        setBattleLog(hit.log, hit.big ? 'dmg-big' : 'dmg');
+        setTimeout(() => afterPlayerTurn(false, hit.log), 420);
+        return;
+    }
+    // 破盾 → 敌人眩晕，玩家追击一回合
+    if (hit.broke) {
+        bonusTurn = true;
+        setBattleLog(hit.log + ' 敌方破盾眩晕，可追击一次！', 'dmg-big');
+        restoreDefend();
+        saveGame();
+        return;
+    }
+    // 追击回合结束 → 敌方清醒并回满韧性
+    if (hit.isBonus) { enemyBroken = false; e.tough = e.toughMax; }
+    setBattleLog(hit.log, hit.big ? 'dmg-big' : 'dmg');
+    setTimeout(() => afterPlayerTurn(true, hit.log), 450);
+}
+
+/* 我方回合结束后进入敌人回合（含多样化 AI） */
 function afterPlayerTurn(enemyAlive, log) {
     if (!enemyAlive) { endBattle(true); return; }
-    document.getElementById('logLine').textContent = log;
-    if (log.indexOf('防御') === -1) refreshBattleUI();
-    // ---- 敌人回合 ----
-    setTimeout(() => {
-        let base = 6 + Math.floor(Math.random() * 5);        // 敌人基础伤害 6-10
-        let name = '史莱姆';
-        if (battling === boss) { base += 8; name = '史莱姆王'; }      // Boss 更凶
-        else if (battling.type === 'bat') { base += 4; name = '蝙蝠'; } // 蝙蝠更强
-        let dmg = defend ? Math.floor(base * 0.5) : base;    // 防御减伤 50%
-        player.hp -= dmg;
-        if (player.hp < 0) player.hp = 0;
-        document.getElementById('logLine').textContent =
-            name + ' 造成 ' + dmg + ' 点伤害！' + (defend ? '（已减伤）' : '');
-        refreshBattleUI();
-        updateHUD();
-        if (player.hp <= 0) {                                // 玩家死亡重开
-            document.getElementById('logLine').textContent = '你被击败了…按 R 重新开始';
-            restoreDefend();
-            return;
+    setBattleLog(log, (log.indexOf('暴击') > -1 || log.indexOf('连击 x') > -1) ? 'dmg-big' : 'dmg');
+    refreshBattleUI();
+    setTimeout(runEnemyTurn, 600);
+}
+
+/* 敌人回合：依据 AI 行为标签决定行动 */
+function runEnemyTurn() {
+    const e = battling;
+    const nm = e.name || enemyPlainName(e);
+    let dmg = 0, msg = '', crit = false;
+
+    if (e.charging) {                              // 上回合蓄力 → 本回合重击
+        e.charging = false;
+        dmg = Math.round(enemyBaseDmg(e) * 1.8);
+        msg = nm + ' 蓄力重击！';
+    } else if (e.ai === 'boss') {
+        if (e.hp < e.maxHp * 0.3 && Math.random() < 0.5) {   // 残血吸收暗能回复
+            const h = Math.round(e.maxHp * 0.18);
+            e.hp = Math.min(e.maxHp, e.hp + h);
+            msg = nm + ' 吸收暗能，回复 ' + h + ' HP！';
+            applyEnemyTurn(0, msg); return;
+        } else if (Math.random() < 0.3) {          // 蓄力
+            e.charging = true;
+            msg = nm + ' 开始蓄力，下回合将发动重击！';
+            applyEnemyTurn(0, msg, true); return;
+        } else {
+            dmg = enemyBaseDmg(e);
+            msg = nm + ' 发动撕咬！';
         }
-        // 恢复可操作状态
+    } else if (e.ai === 'healer' && e.hp < e.maxHp * 0.5) {  // 低血量自愈
+        const h = Math.round(e.maxHp * 0.3);
+        e.hp = Math.min(e.maxHp, e.hp + h);
+        msg = nm + ' 自我修复，回复 ' + h + ' HP！';
+        applyEnemyTurn(0, msg); return;
+    } else if (e.ai === 'defender' && Math.random() < 0.3) {  // 铁壁格挡
+        e.guarding = true;
+        msg = nm + ' 举起盾牌防御！（下次受击伤害减半）';
+        applyEnemyTurn(0, msg); return;
+    } else {                                       // 标准攻击 / 蝙蝠狂暴暴击
+        dmg = enemyBaseDmg(e);
+        if (e.ai === 'critter' && Math.random() < 0.32) {
+            crit = true;
+            dmg += Math.round(enemyBaseDmg(e) * 0.6);
+        }
+        msg = nm + ' 发起攻击！';
+    }
+
+    // 施加伤害（含防御减伤）并结算受击回能
+    if (defend) dmg = Math.floor(dmg * 0.5);
+    player.hp -= dmg;
+    if (player.hp < 0) player.hp = 0;
+    player.energy = Math.min(PLAYER_MAX_ENERGY, player.energy + 15);   // 受击回能
+    msg += ' 造成 ' + dmg + ' 点伤害' + (crit ? '（暴击！）' : '') + (defend ? '（已减伤）' : '') + '！';
+    if (crit) juiceCrit();
+    applyEnemyTurn(dmg, msg);
+}
+
+/* 结算敌人回合结束：更新界面 / 死亡处理 / 恢复可操作 */
+function applyEnemyTurn(dmg, msg, charging) {
+    setBattleLog(msg, dmg === 0 ? 'heal' : (charging ? '' : 'enemy'));
+    refreshBattleUI();
+    updateHUD();
+    if (player.hp <= 0) {
+        setBattleLog('你被击败了…按 R 重新开始', '');
         restoreDefend();
-        document.getElementById('logLine').textContent = '选择你的行动！';
-    }, 600);
+        return;
+    }
+    restoreDefend();
+    setBattleLog('选择你的行动！（大招能量 ' + Math.min(PLAYER_MAX_ENERGY, player.energy) + '/100）', '');
+}
+
+// 敌人无标签的简短名（用于对话）
+function enemyPlainName(e) {
+    return (e === boss) ? '史莱姆王' : (e.type === 'bat' ? '蝙蝠' : '史莱姆');
 }
 
 function restoreDefend() { defend = false; }
@@ -1297,7 +1601,7 @@ let autoSaveTimer = 0;
    重置游戏
    ========================================================= */
 function resetGame() {
-    player = { x: 2*PIX, y: 2*PIX, lv: 1, hp: 100, maxHp: 100, mp: 50, maxMp: 50, atk: 10, xp: 0, xpNeed: 100, dirX: 1, dirY: 0, equip: { weapon: null, armor: null }, inventory: [] };
+    player = { x: 12*PIX, y: 12*PIX, lv: 1, hp: 100, maxHp: 100, mp: 50, maxMp: 50, energy: 0, atk: 10, xp: 0, xpNeed: 100, dirX: 1, dirY: 0, equip: { weapon: null, armor: null }, inventory: [] };
     currentMap = 'grass';                                  // 回到地面世界
     boss = null;
     fireCool = 0; fireball = null; explosion = null;   // 重置火球状态
@@ -1339,6 +1643,7 @@ function loadGame() {
     map = d.map;
     slimes = d.slimes || [];
     boss = d.boss || null;
+    normalizeEnemies();          // 兼容旧档：补齐敌人 AI / 韧性
     return true;
 }
 
@@ -1389,6 +1694,7 @@ function continueGame() {
 // 战斗按钮监听
 document.getElementById('btnAttack').addEventListener('click', onAttack);
 document.getElementById('btnDefend').addEventListener('click', onDefend);
+document.getElementById('btnUlt').addEventListener('click', onUlt);
 document.getElementById('btnStart').addEventListener('click', startNewGame);
 document.getElementById('btnContinue').addEventListener('click', continueGame);
 
@@ -1447,6 +1753,7 @@ function applySave(d) {
     map = d.map;
     slimes = d.slimes || [];
     boss = d.boss || null;
+    normalizeEnemies();                        // 兼容旧档：补齐敌人 AI / 韧性
     fireCool = 0; fireball = null; explosion = null;
     document.getElementById('winMsg').style.display = 'none';
     localStorage.setItem(SAVE_KEY, JSON.stringify(d));
@@ -1538,14 +1845,15 @@ function panelsOpen() {
 
 function renderEquipment() {
     const w = player.equip.weapon, a = player.equip.armor;
-    // 已装备栏：显示名称+加成，并提供"卸下"
-    document.getElementById('eqWeapon').innerHTML =
-        (w ? w.name + ' <span class="stat">' + w.desc + '</span>'
-              + ' <button onclick="unequip(\'weapon\')">卸下</button>' : '<i style="color:#8a7a60">暂无</i>');
-    document.getElementById('eqArmor').innerHTML =
-        (a ? a.name + ' <span class="stat">' + a.desc + '</span>'
-              + ' <button onclick="unequip(\'armor\')">卸下</button>' : '<i style="color:#8a7a60">暂无</i>');
-    // 背包列表
+    // 已装备物品：可拖拽的 eqItem（拖回背包即卸下）
+    const eq = (it, slot) => it
+        ? '<span class="eqItem" draggable="true" data-eqslot="' + slot + '">' + it.name
+          + ' <span class="stat">' + (slot === 'weapon' ? '⚔' : '🛡') + it.desc + '</span></span>'
+        : '<span class="eqEmpty">空 · 拖入装备</span>';
+    document.getElementById('eqWeapon').innerHTML = eq(w, 'weapon');
+    document.getElementById('eqArmor').innerHTML  = eq(a, 'armor');
+
+    // 背包物品：可拖拽卡片
     const list = document.getElementById('eqInvList');
     document.getElementById('eqCount').textContent = player.inventory.length;
     if (player.inventory.length === 0) {
@@ -1554,18 +1862,20 @@ function renderEquipment() {
     }
     list.innerHTML = '';
     player.inventory.forEach((it, i) => {
-        const row = document.createElement('div');
-        row.className = 'invRow';
-        row.innerHTML = '<span>' + it.name + '<span class="stat">' + (it.type === 'weapon' ? '⚔' : '🛡') + ' ' + it.desc + '</span></span>'
-                      + '<button onclick="equipFromInventory(' + i + ')">装备</button>';
-        list.appendChild(row);
+        const card = document.createElement('div');
+        card.className = 'invCard';
+        card.draggable = true;
+        card.dataset.idx = i;
+        card.innerHTML = '<span>' + it.name
+            + '<span class="stat"> ' + (it.type === 'weapon' ? '⚔' : '🛡') + ' ' + it.desc + '</span></span>';
+        list.appendChild(card);
     });
 }
 
 function openEqPanel() {
     closeSavePanel();                    // 打开装备面板时收起存档面板
     document.getElementById('eqPanel').style.display = 'flex';
-    document.getElementById('eqMsg').textContent = '';
+    setEqMsg('', false);
     renderEquipment();
 }
 function closeEqPanel() {
@@ -1583,6 +1893,84 @@ document.addEventListener('keydown', e => {
     }
 });
 document.getElementById('btnCloseEq').addEventListener('click', closeEqPanel);
+
+/* =========================================================
+   装备面板：拖拽交互
+   背包物品 → 拖到对应槽位即装备；已装备 → 拖回背包即卸下
+   ========================================================= */
+let dragFrom = null;                 // 正在拖拽的来源：{kind:'inv',idx} / {kind:'eq',slot}
+let eqMsgTimer = null;
+
+function setEqMsg(txt, isErr) {
+    const el = document.getElementById('eqMsg');
+    el.textContent = txt;
+    el.className = isErr ? 'err' : '';
+    clearTimeout(eqMsgTimer);
+    if (txt) eqMsgTimer = setTimeout(() => { el.textContent = ''; el.className = ''; }, 2000);
+}
+
+// 记录拖拽来源（背包卡 or 已装备）
+document.addEventListener('dragstart', e => {
+    const card = e.target.closest && e.target.closest('.invCard');
+    const item = e.target.closest && e.target.closest('.eqItem');
+    if (card) {
+        dragFrom = { kind: 'inv', idx: +card.dataset.idx };
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', 'inv');
+    } else if (item) {
+        dragFrom = { kind: 'eq', slot: item.dataset.eqslot };
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', 'eq');
+    }
+});
+// 拖拽结束或取消：清理来源与高亮
+document.addEventListener('dragend', () => {
+    dragFrom = null;
+    clearHighlights();
+});
+function clearHighlights() {
+    document.querySelectorAll('.dragHover').forEach(el => el.classList.remove('dragHover'));
+}
+
+// --- 装备槽（收下背包拖来的装备） ---
+const eqSlotRow = document.getElementById('eqSlotRow');
+eqSlotRow.addEventListener('dragenter', e => {
+    const slot = e.target.closest('.eqSlot');
+    if (slot && dragFrom && dragFrom.kind === 'inv') slot.classList.add('dragHover');
+});
+eqSlotRow.addEventListener('dragover', e => {
+    const slot = e.target.closest('.eqSlot');
+    if (slot && dragFrom && dragFrom.kind === 'inv') { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+});
+eqSlotRow.addEventListener('drop', e => {
+    const slot = e.target.closest('.eqSlot');
+    if (!slot) return;
+    e.preventDefault(); e.stopPropagation();
+    clearHighlights();
+    if (!dragFrom || dragFrom.kind !== 'inv') return;
+    const it = player.inventory[dragFrom.idx];
+    if (it && it.type === slot.dataset.slot) {
+        equipFromInventory(dragFrom.idx);          // 类型匹配 → 装备
+    } else {
+        setEqMsg('该装备类型与槽位不符！', true);
+    }
+    dragFrom = null;
+});
+
+// --- 背包容区（收下"卸下的已装备"） ---
+const eqInvList = document.getElementById('eqInvList');
+eqInvList.addEventListener('dragenter', e => {
+    if (dragFrom && dragFrom.kind === 'eq') eqInvList.classList.add('dragHover');
+});
+eqInvList.addEventListener('dragover', e => {
+    if (dragFrom && dragFrom.kind === 'eq') { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+});
+eqInvList.addEventListener('drop', e => {
+    e.preventDefault(); e.stopPropagation();
+    clearHighlights();
+    if (dragFrom && dragFrom.kind === 'eq') unequip(dragFrom.slot);   // 卸下回背包
+    dragFrom = null;
+});
 </script>
 </body>
 </html>
