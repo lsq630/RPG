@@ -147,6 +147,8 @@
         letter-spacing: 2px;
     }
     #battleBtns button:hover { background: #6a4a28; }
+    #battleBtns button:disabled { opacity: .4; cursor: not-allowed; }
+    #battleBtns button small { font-size: 11px; color: #c8a86a; letter-spacing: 0; }
 
     /* 战报文本 */
     #logLine {
@@ -476,6 +478,11 @@
     .invCard:active { cursor: grabbing; }
     .invCard:hover { border-color: #8a6a3a; }
     .invCard .stat { color: #7fbf7f; margin-left: 8px; }
+    .recastBtn {
+        font-family: inherit; font-size: 11px; padding: 2px 8px; margin-left: 8px;
+        background: #2a3a1e; color: #c8e87a; border: 1px solid #5a7a3a; border-radius: 3px; cursor: pointer;
+    }
+    .recastBtn:hover { background: #3a5a2a; }
     .eqItem {
         display: inline-block;
         margin: 2px 0;
@@ -612,6 +619,205 @@
         cursor: pointer;
     }
     #btnCloseGacha:hover { background: #4a3c2a; color: #fff; }
+
+    /* ============ 属性加点面板 ============ */
+    #statPanel {
+        position: absolute;
+        inset: 0;
+        z-index: 52;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        background: rgba(10, 6, 14, 0.92);
+    }
+    #statBox {
+        width: 380px;
+        background: #221a18;
+        border: 4px solid #3a7a5a;
+        padding: 18px 24px;
+        max-height: 92%;
+        overflow: auto;
+        text-align: center;
+    }
+    #statBox small { color: #a09080; }
+    #statTitle { font-size: 20px; color: #7fe0b0; letter-spacing: 3px; margin-bottom: 8px; }
+    #statPoints { font-size: 15px; color: #e0d0b0; margin: 4px 0 12px; }
+    #statPoints b { color: #7fe0b0; font-size: 18px; }
+    #statRows { display: flex; flex-direction: column; gap: 8px; }
+    .statRow {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: rgba(0,0,0,.3);
+        border: 1px solid #2a4a3a;
+        border-radius: 4px;
+    }
+    .statInfo { display: flex; align-items: baseline; gap: 8px; font-size: 13px; }
+    .statLabel { font-size: 15px; color: #c8e0d0; }
+    .statDesc { font-size: 11px; color: #8a9a90; }
+    .statInfo b { color: #7fe0b0; font-size: 17px; margin-left: 4px; min-width: 20px; }
+    .statBtn {
+        font-family: inherit;
+        font-size: 15px;
+        width: 30px; height: 30px;
+        background: #1e3a2e;
+        color: #7fe0b0;
+        border: 2px solid #3a7a5a;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+    .statBtn:hover:not(:disabled) { background: #2a5a44; }
+    .statBtn:disabled { opacity: .4; cursor: not-allowed; }
+    .statCur { font-size: 12px; color: #b0c0b8; margin: 12px 0; }
+    .statCur b { color: #7fe0b0; }
+    #btnCloseStat {
+        font-family: inherit; font-size: 13px; padding: 6px 20px;
+        background: #1e3a2e; color: #b0d0c0;
+        border: 2px solid #3a7a5a; cursor: pointer;
+    }
+    #btnCloseStat:hover { background: #2a5a44; color: #fff; }
+
+    /* 成就 / 图鉴面板 */
+    #journalPanel {
+        position: absolute;
+        inset: 0;
+        z-index: 54;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        background: rgba(10, 8, 6, 0.92);
+    }
+    #journalBox {
+        width: 460px;
+        background: #221d18;
+        border: 4px solid #a0802a;
+        padding: 18px 24px;
+        max-height: 92%;
+        overflow: auto;
+        text-align: left;
+    }
+    #journalTitle { font-size: 20px; color: #ffd95e; letter-spacing: 3px; text-align: center; margin-bottom: 12px; }
+    #journalTitle small { font-size: 11px; color: #a09080; letter-spacing: 0; }
+    .j-sec { margin-top: 14px; }
+    .j-secHead { font-size: 14px; color: #ffd95e; border-bottom: 1px solid #4a3a1a; padding-bottom: 4px; margin-bottom: 8px; }
+    .j-bestiary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .j-best-row {
+        display: flex; justify-content: space-between; align-items: center;
+        background: rgba(0,0,0,.3); border: 1px solid #3a2f1a; border-radius: 4px; padding: 6px 10px; font-size: 12px;
+    }
+    .j-best-row .name { color: #e0c890; }
+    .j-best-row .cnt { color: #ffd07a; }
+    .j-best-row .blk { color: #7a6a4a; font-size: 11px; }
+    .j-ach { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    .j-ach li {
+        display: flex; justify-content: space-between; align-items: center;
+        background: rgba(0,0,0,.3); border: 1px solid #3a2f1a; border-radius: 4px; padding: 6px 10px; font-size: 12px;
+    }
+    .j-ach li.done { border-color: #ffd95e; background: rgba(120,90,20,.18); }
+    .j-ach .desc { color: #d0b890; }
+    .j-ach .prog { color: #8a7a5a; font-size: 11px; }
+    .j-ach .ok { color: #7fe0b0; font-weight: bold; }
+    .j-ach .no { color: #7a6a4a; }
+    #btnCloseJournal {
+        display: block; margin: 14px auto 0; font-family: inherit; font-size: 13px; padding: 6px 24px;
+        background: #4a3a1a; color: #ffd95e; border: 2px solid #a0802a; cursor: pointer;
+    }
+    #btnCloseJournal:hover { background: #6a5a2a; color: #fff; }
+
+    /* ============ 技能天赋面板（按 T 呼出） ============ */
+    #talentPanel {
+        position: absolute;
+        inset: 0;
+        z-index: 53;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        background: rgba(10, 12, 6, 0.92);
+    }
+    #talentBox {
+        width: 620px;
+        max-height: 92%;
+        overflow: auto;
+        background: #1e2118;
+        border: 4px solid #7a8a3a;
+        padding: 16px 22px;
+        text-align: center;
+    }
+    #talentTitle { font-size: 21px; color: #c8e87a; letter-spacing: 3px; margin-bottom: 4px; }
+    #talentPts { font-size: 14px; color: #d8e0b0; margin: 4px 0 10px; }
+    #talentPts b { color: #c8e87a; font-size: 17px; }
+    #talentMsg { min-height: 16px; font-size: 12px; color: #a8c86a; margin: 6px 0; }
+    #talentMsg.err { color: #ff9d7f; }
+    .tal-line { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .tal-secHead {
+        grid-column: 1 / -1; text-align: left; font-size: 14px; color: #c8e87a;
+        border-bottom: 1px dashed #4a5a2a; padding-bottom: 4px; letter-spacing: 2px;
+    }
+    .tal-node {
+        background: rgba(0,0,0,.32); border: 1px solid #3a4a2a; border-radius: 5px;
+        padding: 8px 9px; font-size: 12px; text-align: left; display: flex; flex-direction: column; justify-content: space-between;
+        min-height: 76px;
+    }
+    .tal-node .nName { color: #e0efc0; font-size: 13px; font-weight: bold; }
+    .tal-node .nDesc { color: #9aac80; font-size: 11px; line-height: 1.4; margin: 3px 0 6px; }
+    .tal-node .nLv { color: #c8e87a; font-size: 11px; margin-bottom: 4px; letter-spacing: 1px; }
+    .tal-node .nLv b { color: #e8ffa0; }
+    .tal-node .nBtn {
+        font-family: inherit; font-size: 11px; padding: 3px 0; cursor: pointer;
+        background: #2a3a1e; color: #c8e87a; border: 1px solid #5a7a3a; border-radius: 3px;
+    }
+    .tal-node .nBtn:hover:not(:disabled) { background: #3a5a2a; }
+    .tal-node .nBtn:disabled { opacity: .4; cursor: not-allowed; }
+    #btnCloseTalent {
+        font-family: inherit; font-size: 13px; padding: 6px 22px; margin-top: 4px;
+        background: #2a3a1e; color: #c0d896; border: 2px solid #5a7a3a; cursor: pointer;
+    }
+    #btnCloseTalent:hover { background: #3a5a2a; color: #fff; }
+
+    /* ============ 商店面板（按 O 呼出） ============ */
+    #shopPanel {
+        position: absolute;
+        inset: 0;
+        z-index: 54;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        background: rgba(10, 12, 6, 0.92);
+    }
+    #shopBox {
+        width: 600px;
+        max-height: 92%;
+        overflow: auto;
+        background: #1c1a14;
+        border: 4px solid #b08a3a;
+        padding: 16px 22px;
+        text-align: center;
+    }
+    #shopTitle { font-size: 21px; color: #ffd95e; letter-spacing: 3px; margin-bottom: 4px; }
+    #shopGold { font-size: 15px; color: #ffe9ae; margin: 4px 0 8px; }
+    #shopGold b { color: #ffd95e; }
+    #shopMsg { min-height: 18px; font-size: 12px; color: #a8c86a; margin: 6px 0; }
+    #shopMsg.err { color: #ff9d7f; }
+    .shopItem {
+        display: flex; align-items: center; justify-content: space-between; gap: 8px;
+        background: rgba(0,0,0,.3); border: 1px solid #3a3322; border-radius: 5px;
+        padding: 8px 12px; margin-bottom: 8px; text-align: left; font-size: 13px;
+    }
+    .shopItem .siName { color: #ffe9ae; font-weight: bold; }
+    .shopItem .siDesc { color: #9aac80; font-size: 12px; margin-left: 10px; }
+    .shopItem .siPrice { color: #ffd95e; min-width: 90px; text-align: right; font-weight: bold; }
+    .shopItem button {
+        font-family: inherit; font-size: 12px; padding: 4px 14px; cursor: pointer; border-radius: 3px;
+        background: #3a5a2a; color: #c8e87a; border: 1px solid #5a7a3a;
+    }
+    .shopItem button:hover:not(:disabled) { background: #4a7a3a; color: #fff; }
+    .shopItem button:disabled { opacity: .4; cursor: not-allowed; }
+    #btnCloseShop {
+        font-family: inherit; font-size: 13px; padding: 6px 22px; margin-top: 4px;
+        background: #3a2c1a; color: #ffd95e; border: 2px solid #8a6a3a; cursor: pointer;
+    }
+    #btnCloseShop:hover { background: #5a4a2a; color: #fff; }
 </style>
 </head>
 <body>
@@ -636,7 +842,7 @@
             </div>
             <div>HP <b id="hudHp">100</b>/<b id="hudMaxHp">100</b></div>
             <div>MP <b id="hudMp">50</b>/<b id="hudMaxMp">50</b> <span id="hudCd" style="color:#ff9d5e"></span> ⚡<b id="hudEnergy">0</b></div>
-                <div>🎟 抽数 <b id="hudPulls">0</b></div>
+            <div>🍶 药水 <b id="hudPotions">0</b> ｜ 🎟 抽数 <b id="hudPulls">0</b> ｜ 💰 金币 <b id="hudGold">0</b></div>
             <div id="hudEquip" style="color:#c8b8d8; font-size:12px"></div>
             <div id="saveTip" style="color:#7fbf7f; font-size:11px; opacity:0; transition:opacity .4s">已自动保存</div>
             <div id="xpWrap">
@@ -667,6 +873,8 @@
             <div id="battleBtns">
                 <button id="btnAttack">攻击</button>
                 <button id="btnDefend">防御</button>
+                <!-- 技能：消耗 MP 瞬发爆发 -->
+                <button id="btnSkill">🔥 火球术 <small>(10MP)</small></button>
                 <!-- 大招：普攻/受击攒能量，满 100 可释放 -->
                 <div id="ultWrap">
                     <div id="ultBarWrap"><div id="ultFill"></div></div>
@@ -681,7 +889,7 @@
     <div id="winMsg"><div id="winBox">🎉 胜利！Boss 被击败 🎉<br><small style="font-size:14px">按 R 重新开始</small></div></div>
 
     <!-- 底部提示 -->
-    <div id="hint">WASD 移动 | 敌人前按空格战斗 | Q 火球术 | 紫门/绿门按 Enter 进出洞穴 | I 装备背包 | L 存取档 | R 重开</div>
+    <div id="hint">WASD 移动 | 空格 战斗 | Q 火球 | 1 喝药 | Shift 冲刺 | E 开宝箱 | 回车 进/出洞穴 | I/H/J/K/L/T/O 面板 | R 重开</div>
 
     <!-- 进入界面：游戏未开始时展示 -->
     <div id="startScreen">
@@ -693,17 +901,23 @@
             <!-- 操作说明卡 -->
             <div id="startControls">
                 <div class="ctrlRow"><span class="key">W A S D</span><span class="desc">移动</span></div>
-                <div class="ctrlRow"><span class="key">空格</span><span class="desc">回合制战斗</span></div>
-                <div class="ctrlRow"><span class="key">破盾/大招</span><span class="desc">打空敌人韧性破盾眩晕 · 战斗内攒能量放🔥大招</span></div>
-                <div class="ctrlRow"><span class="key">Q</span><span class="desc">火球术（10MP / 30伤 / 3s冷却）</span></div>
+                <div class="ctrlRow"><span class="key">空格</span><span class="desc">回合制战斗（火球术/大招可选）</span></div>
+                <div class="ctrlRow"><span class="key">Shift</span><span class="desc">冲刺突进（15MP / 2s冷却）</span></div>
+                <div class="ctrlRow"><span class="key">Q</span><span class="desc">野图火球术（10MP / 3s冷却）</span></div>
+                <div class="ctrlRow"><span class="key">1</span><span class="desc">饮用治愈药水（回60%最大HP）</span></div>
+                <div class="ctrlRow"><span class="key">E</span><span class="desc">开启金色宝箱（抽数/药水/装备/经验）</span></div>
                 <div class="ctrlRow"><span class="key">K</span><span class="desc">卡池抽取（打怪掉落抽数🎟）</span></div>
+                <div class="ctrlRow"><span class="key">H</span><span class="desc">自由加点（力量/体能/敏捷）</span></div>
+                <div class="ctrlRow"><span class="key">T</span><span class="desc">技能天赋树（4系被动强化）</span></div>
+                <div class="ctrlRow"><span class="key">O</span><span class="desc">克雷姆商店（金币购装/药水）</span></div>
+                <div class="ctrlRow"><span class="key">J</span><span class="desc">冒险图鉴（怪物/成就）</span></div>
                 <div class="ctrlRow"><span class="key">I / L</span><span class="desc">装备背包 / 存取档</span></div>
                 <div class="ctrlRow"><span class="key">Enter</span><span class="desc">紫色传送门进洞穴 / 绿色门返回</span></div>
                 <div class="ctrlRow"><span class="key">R</span><span class="desc">重新开始</span></div>
             </div>
 
             <!-- 玩法说明 -->
-            <div id="startGoal">开放世界自由冒险：史莱姆与洞穴蝙蝠会不断刷新，击败它们积累经验、装备与抽数🎟；偶尔出没的紫色史莱姆王是可选精英，击杀有丰厚奖励！</div>
+            <div id="startGoal">开放世界自由冒险：草原→森林→荒漠→火山群系环环相扣，怪物会随外层强度不断变强。击败怪物积累经验、抽数与装备🎟；走近金色宝箱按 E 拾取奖励，按 H 自由加点打造专属勇者，按 J 查看图鉴与成就！</div>
 
             <!-- 开始按钮 -->
             <button id="btnStart">开始冒险</button>
@@ -787,6 +1001,61 @@
             <button id="btnCloseGacha">关闭</button>
         </div>
     </div>
+
+    <!-- 属性加点面板（按 H 呼出）：每级 3 点自由属性 -->
+    <div id="statPanel">
+        <div id="statBox">
+            <div id="statTitle">📊 角色成长 <small style="font-size:11px;color:#a09080">（ 按 H 呼出 ）</small></div>
+            <div id="statPoints">可用属性点：<b id="statPtsTxt">0</b></div>
+            <div id="statRows">
+                <div class="statRow">
+                    <div class="statInfo"><span class="statLabel">💪 力量</span><span class="statDesc">攻击 +1 / 点</span><b id="statStr">0</b></div>
+                    <button class="statBtn" data-stat="str">＋</button>
+                </div>
+                <div class="statRow">
+                    <div class="statInfo"><span class="statLabel">❤️ 体能</span><span class="statDesc">最大HP +8 / 点</span><b id="statVit">0</b></div>
+                    <button class="statBtn" data-stat="vit">＋</button>
+                </div>
+                <div class="statRow">
+                    <div class="statInfo"><span class="statLabel">💨 敏捷</span><span class="statDesc">暴击 +1% / 点</span><b id="statAgi">0</b></div>
+                    <button class="statBtn" data-stat="agi">＋</button>
+                </div>
+            </div>
+            <div class="statCur">当前：攻击 <b id="statCurAtk">10</b> ｜ 最大HP <b id="statCurHp">100</b> ｜ 暴击 <b id="statCurCrit">10</b>%</div>
+            <button id="btnCloseStat">关闭</button>
+        </div>
+    </div>
+
+    <!-- 成就 / 图鉴面板（按 J 呼出）：怪物图鉴 + 冒险成就 -->
+    <div id="journalPanel">
+        <div id="journalBox">
+            <div id="journalTitle">📖 冒险图鉴 <small style="color:#a09080">（ 按 J 呼出 ）</small></div>
+            <div id="journalBody"></div>
+            <button id="btnCloseJournal">关闭</button>
+        </div>
+    </div>
+
+    <!-- 技能天赋面板（按 T 呼出）：四系天赋被动强化 -->
+    <div id="talentPanel">
+        <div id="talentBox">
+            <div id="talentTitle">🌳 技能天赋 <small style="color:#9aac80">（ 按 T 呼出 ）</small></div>
+            <div id="talentPts">可用技能点：<b id="talentPtsTxt">0</b></div>
+            <div id="talentMsg">升级或击败精英史莱姆王可获得技能点。</div>
+            <div id="talentTree"></div>
+            <button id="btnCloseTalent">关闭</button>
+        </div>
+    </div>
+
+    <!-- 商店面板（按 O 呼出）：用金币购买装备/药水/抽数 -->
+    <div id="shopPanel">
+        <div id="shopBox">
+            <div id="shopTitle">🏪 克雷姆商店 <small style="color:#a09080">（ 按 O 呼出 ）</small></div>
+            <div id="shopGold">💰 金币：<b id="shopGoldTxt">0</b></div>
+            <div id="shopMsg"></div>
+            <div id="shopList"></div>
+            <button id="btnCloseShop">关闭</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -818,6 +1087,8 @@ let player = {
     mp: 50, maxMp: 50,               // 法力值（火球术消耗）
     energy: 0,                       // 大招能量（战斗中普攻/受击积攒，满 100 可放大招）
     pulls: 0,                        // 抽数（击败怪物掉落，用于卡池抽取）
+    potions: 0,                      // 治愈药水（快捷键 1 饮用回血）
+    gold: 0,                         // 金币（击杀/宝箱获取，用于商店与装备重铸）
     pityTotal: 0,                    // 传说保底计数（原神式：累计抽数，满 60 出传说）
     pity4: 0,                        // 史诗/更高保底计数（每 10 抽必出一件 4星级）
     gachaGuarantee: false,           // 大保底：上次传说歪了非UP → 下次传说必出UP
@@ -825,6 +1096,10 @@ let player = {
     fatePoints: 0,                   // 命定值：抽中非目标传说 +1，满2点下次传说必出目标
     atk: 10,
     xp: 0, xpNeed: 100,              // 升级所需经验
+    statPts: 0,                      // 可分配的自由属性点
+    skillPts: 0,                     // 技能天赋点（升级/击败精英 +1）
+    talents: {},                     // 已学天赋 { 天赋key: 等级 }
+    str: 0, vit: 0, agi: 0,          // 力量(攻击) / 体力(HP) / 敏捷(暴击) - 每级 +3 点
     dirX: 1, dirY: 0,                // 面向方向（决定火球术方向）
     equip: { weapon: null, armor: null },  // 已装备：武器 / 防具
     inventory: [],                         // 背包里的装备
@@ -848,15 +1123,70 @@ const ITEMS = {
     armor_void:    { type: 'armor',  name: '虚空重甲', stat: 80, desc: '最大HP +80' },
 };
 
-// 有效攻击力 = 基础攻击 + 武器加成
+// 有效攻击力 = 基础攻击 + 武器加成 + 副词条攻击（武器/防具）+ 力量加点(每点+1攻击)
 function effAtk() {
     const w = player.equip && player.equip.weapon;
-    return player.atk + (w ? w.stat : 0);
+    const a = player.equip && player.equip.armor;
+    const wAtk = (w && w.afo && w.afo.atk) || 0;
+    const aAtk = (a && a.afo && a.afo.atk) || 0;
+    return player.atk + (w ? w.stat : 0) + wAtk + aAtk + (player.str || 0);
+}
+
+// 暴击几率（基础 10% + 每点敏捷 +1% + 百步穿杨天赋 +2%/级 + 装备副词条暴击）
+function playerCrit() {
+    const w = player.equip && player.equip.weapon;
+    const a = player.equip && player.equip.armor;
+    const wCrit = (w && w.afo && w.afo.crit) || 0;
+    const aCrit = (a && a.afo && a.afo.crit) || 0;
+    return 0.10 + (player.agi || 0) * 0.01 + talLv('marksman') * 0.02 + wCrit * 0.01 + aCrit * 0.01;
 }
 
 // 装备一件武器/防具（自动穿上空缺槽位，否则放入背包）
+// 背包上限：防止存档 JSON 无限膨胀导致自动存档越跑越卡
+const INVENTORY_MAX = 40;
+// 生成一件装备的独立实例（克隆基础属性，规避重铸/副词条污染共享图鉴）
+function instantiateItem(key) {
+    const base = ITEMS[key];
+    const it = Object.assign({}, base, { uid: (Math.random() * 1e9) | 0 });
+    return it;
+}
+
+// 重铸成本基础值（按物品稀有度略有差异）
+function recastCost(it) {
+    const s = (it && it.stat) || 0;
+    return 40 + Math.floor(s / 8) * 5;
+}
+
+// 重铸：消耗金币为该装备随机生成/重置一条副词条（攻击 +X 或 暴击 +X%）
+function recastItem(it) {
+    if (!it) return;
+    const cost = recastCost(it);
+    if (player.gold < cost) { addPickup('💰 金币不足！重铸需 ' + cost + ' 金币'); return; }
+    player.gold -= cost;
+    if (it.type === 'weapon') {
+        // 武器：攻击 +2~6 或 暴击 +1~3%
+        it.afo = Math.random() < 0.7
+            ? { atk: 2 + ((Math.random() * 5) | 0), crit: 0 }
+            : { atk: 0, crit: 1 + ((Math.random() * 3) | 0) };
+    } else {
+        // 防具：暴击 +1~4%（防具偏防御，只出暴击词条）
+        it.afo = { atk: 0, crit: 1 + ((Math.random() * 4) | 0) };
+    }
+    addPickup('⚒ 重铸完成：' + it.name + ' → ' + affixText(it));
+    updateHUD(); saveGame(); renderEquipment();
+}
+
+// 副词条文本（如"+3攻击 +2%暴击"）
+function affixText(it) {
+    if (!it || !it.afo) return '无词条';
+    const parts = [];
+    if (it.afo.atk > 0) parts.push('⚔+' + it.afo.atk + '攻击');
+    if (it.afo.crit > 0) parts.push('💥+' + it.afo.crit + '%暴击');
+    return parts.length ? parts.join(' ') : '无词条';
+}
+
 function addItem(key) {
-    const it = ITEMS[key];
+    const it = instantiateItem(key);
     const slot = it.type;
     if (!player.equip[slot]) {
         player.equip[slot] = it;                       // 槽位为空 → 直接穿上
@@ -866,8 +1196,16 @@ function addItem(key) {
         }
         addPickup('装备 ' + it.name + ' ' + it.desc);
     } else {
-        player.inventory.push(it);                     // 槽位已占用 → 先收进背包
-        addPickup('获得 ' + it.name + ' ' + it.desc);
+        // 背包已满：回收重复装备为抽数，避免无限制堆叠拖慢存档
+        if (player.inventory.length >= INVENTORY_MAX) {
+            player.pulls += 2;
+            const g = 5 + ((Math.random() * 10) | 0);
+            player.gold += g;
+            addPickup('背包已满：' + it.name + ' 自动回收 +2 🎟 +' + g + ' 💰');
+        } else {
+            player.inventory.push(it);                 // 槽位已占用 → 先收进背包
+            addPickup('获得 ' + it.name + ' ' + it.desc);
+        }
     }
     updateHUD(); saveGame();
 }
@@ -914,22 +1252,151 @@ function addPickup(msg) {
     pickupTimer = setTimeout(() => { el.style.opacity = '0'; }, 2500);
 }
 
-// 敌人死亡掉落：Boss 必掉两件强力装备；普通敌人 50% 掉一件
+// 饮用治愈药水：消耗 1 瓶恢复 60% 最大生命（战斗中也允许）
+function drinkPotion() {
+    if (player.potions <= 0) { addPickup('🍶 没有药水了！开宝箱或抽卡可获得'); return; }
+    if (player.hp >= player.maxHp) { addPickup('生命已满，无需用药'); return; }
+    player.potions--;
+    const heal = Math.max(1, Math.round(player.maxHp * 0.6 * talMult('alchemy', 0.15)));   // 药剂精通：+15%/级
+    player.hp = Math.min(player.maxHp, player.hp + heal);
+    addPickup('🍶 饮用药水，回复 ' + heal + ' HP！');
+    updateHUD(); saveGame();
+    refreshBattleUI();
+}
+
+// 图鉴击杀计数：记录每种怪被击败次数（用于成就/图鉴）
+function upKillCount(type) {
+    if (!player.achievements) player.achievements = {};
+    player.achievements[type] = (player.achievements[type] || 0) + 1;
+}
+function killCount(type) { return (player.achievements && player.achievements[type]) || 0; }
+
+// 敌人死亡掉落：Boss 必掉两件强力装备；不同怪掉落倾向不同
 function giveEnemyLoot(type) {
-    if (type === 'boss') { addItem('hero_sword'); addItem('crystal_armor'); return; }
-    if (Math.random() < 0.5) {
-        const pool = (type === 'bat') ? ['leather_armor', 'iron_sword'] : ['iron_sword', 'leather_armor'];
+    // 击杀掉落金币（越外层的怪越多）
+    const goldMap = { bat: 6, wolf: 12, golem: 20, demon: 30, slime: 8 };
+    if (type && goldMap[type] != null) {
+        const g = goldMap[type] + ((Math.random() * 6) | 0);
+        player.gold += g;
+        addPickup('💰 掉落金币 +' + g);
+    }
+    if (type === 'boss') {
+        // 精英史莱姆王必掉强力装备，且约 1/3 概率额外掉落一件传说/限定极品
+        player.gold += 80 + ((Math.random() * 40) | 0);   // 精英额外金币
+        addItem('hero_sword'); addItem('crystal_armor');
+        if (Math.random() < 0.35) {
+            const jackpot = ['sword_legend', 'sword_star', 'armor_mithril', 'armor_void'];
+            addItem(jackpot[(Math.random() * jackpot.length) | 0]);
+            addPickup('👑 史莱姆王藏有神装，额外掉落极品装备！');
+        }
+        return;
+    }
+    if (Math.random() < 0.55) {
+        const pool = {
+            bat:   ['leather_armor', 'iron_sword'],
+            wolf:  ['iron_sword', 'leather_armor'],
+            golem: ['crystal_armor', 'iron_sword'],
+            demon: ['hero_sword', 'crystal_armor'],
+            slime: ['iron_sword', 'leather_armor'],
+        }[type] || ['iron_sword', 'leather_armor'];
         addItem(pool[Math.floor(Math.random() * pool.length)]);
     }
 }
 
-/* 击败怪物掉落"抽数"（用于卡池抽取） */
-function dropPulls(kind) {
-    // 史莱姆 1、蝙蝠 2、Boss 5
-    const n = (kind === 'boss') ? 5 : (kind === 'bat' ? 2 : 1);
+/* 击败怪物掉落"抽数"（按怪物种类；数值与该怪的掉落定义一致） */
+function resolvePulls(e) {
+    dropPulls2(e.pulls != null ? e.pulls : 1);
+}
+
+/* 掉落指定数量抽数并提示 */
+function dropPulls2(n) {
     player.pulls += n;
-    addPickup(kind === 'boss' ? 'Boss 掉落：抽数 +' + n + ' 🎟' : '掉落：抽数 +' + n + ' 🎟');
+    addPickup('掉落：抽数 +' + n + ' 🎟');
     updateHUD(); saveGame();
+}
+
+/* =========================================================
+   宝箱系统：世界各处散落宝箱，走近按 E 开启获得奖励
+   宝箱开过后经过一段时间（respTimer）刷新，允许重复开启
+   ========================================================= */
+let chests = [];       // { gx, gy, opened, respTimer }
+let mpRegen = 0;       // 战斗外回蓝计时（秒）
+const CHEST_KEEP = 5;  // 视野内常驻宝箱数
+const CHEST_RESPAWN = 30;   // 开启后 30 秒重新装满
+
+// 在玩家周围空地放一个宝箱（不贴着玩家、不压传送门/出生区）
+function placeChest() {
+    const pcx = Math.round(player.x / tile), pcy = Math.round(player.y / tile);
+    const rad = 30;
+    for (let t = 0; t < 260; t++) {
+        const gx = pcx + (Math.floor(Math.random() * (rad * 2 + 1)) - rad);
+        const gy = pcy + (Math.floor(Math.random() * (rad * 2 + 1)) - rad);
+        if (worldTile(gx, gy) !== 0) continue;
+        if (Math.abs(gx * tile - player.x) + Math.abs(gy * tile - player.y) < 80) continue;  // 别贴脸
+        if (chests.some(c => c.gx === gx && c.gy === gy)) continue;
+        if (gx === GATE_WORLD.gx && gy === GATE_WORLD.gy) continue;
+        chests.push({ gx, gy, opened: false, respTimer: 0 });
+        return true;
+    }
+    return false;
+}
+// 必要时补充未开启的宝箱数量
+function replenishChests() {
+    const open = chests.filter(c => !c.opened).length;
+    for (let i = open; i < CHEST_KEEP; i++) if (!placeChest()) break;
+}
+// 每帧驱动：开启的宝箱倒计时回收再重新放置
+function tickChests(dt) {
+    for (let i = chests.length - 1; i >= 0; i--) {
+        const c = chests[i];
+        if (c.opened) {
+            c.respTimer -= dt;
+            if (c.respTimer <= 0) chests.splice(i, 1);   // 消失，等重新补
+        } else if (Math.hypot(c.gx - player.x / tile, c.gy - player.y / tile) > 46) {
+            chests.splice(i, 1);   // 远离玩家区域的宝箱回收
+        }
+    }
+    replenishChests();
+}
+// 寻找玩家可开启的最近宝箱
+function nearChest() {
+    return chests.find(c => !c.opened && Math.hypot(c.gx * tile + 16 - player.x, c.gy * tile + 16 - player.y) < 60) || null;
+}
+// 开启宝箱：随机奖励抽数 / 药水 / 装备
+function openChest(c) {
+    if (!c || c.opened) return;
+    c.opened = true; c.respTimer = CHEST_RESPAWN;
+    player.chests = (player.chests || 0) + 1;
+    const r = Math.random();
+    let msg;
+    if (r < 0.42) {                                       // 抽数（最常见）
+        const n = 2 + ((Math.random() * 3) | 0);
+        player.pulls += n;
+        msg = '🎁 宝箱开启：抽数 +' + n + ' 🎟';
+    } else if (r < 0.60) {                                // 经验
+        const xp = 15 + ((Math.random() * 20) | 0);
+        gainXP(xp);
+        msg = '🎁 宝箱开启：经验 +' + xp + ' ✨';
+    } else if (r < 0.72) {                                // 金币
+        const g = 20 + ((Math.random() * 30) | 0);
+        player.gold += g;
+        msg = '💰 宝箱开启：金币 +' + g;
+    } else if (r < 0.88) {                                // 随机装备（越往外越好）
+        const tier = Math.min(3, zoneTier(Math.round(c.gx), Math.round(c.gy)));
+        const pool = [['iron_sword','leather_armor'],
+                      ['hero_sword','leather_armor','crystal_armor'],
+                      ['crystal_armor','hero_sword','armor_mithril'],
+                      ['hero_sword','crystal_armor','sword_legend']][tier] || ['iron_sword','leather_armor'];
+        addItem(pool[(Math.random() * pool.length) | 0]);
+        msg = '🎁 宝箱开启：获得装备！请按 I 查看背包';
+    } else {                                              // 药水 + 抽数
+        player.potions += 1;
+        player.pulls += 1;
+        msg = '🎁 宝箱开启：治愈药水 +1 & 抽数 +1 🎟（按 1 饮用）';
+    }
+    addPickup(msg);
+    updateHUD(); saveGame();
+    return c;
 }
 
 // 兼容旧存档：缺少装备字段时补齐默认值
@@ -938,12 +1405,23 @@ function normalizeEquipment() {
     if (!Array.isArray(player.inventory)) player.inventory = [];
     if (player.energy == null) player.energy = 0;          // 兼容旧档：无大招能量
     if (player.pulls == null) player.pulls = 0;            // 兼容旧档：无抽数
+    if (player.potions == null) player.potions = 0;        // 兼容旧档：无药水
+    if (player.gold == null) player.gold = 0;              // 兼容旧档：无金币
     if (player.pityTotal == null) player.pityTotal = 0;    // 兼容旧档：无保底计数
     if (player.pity4 == null) player.pity4 = 0;
     if (player.gachaGuarantee == null) player.gachaGuarantee = false;
     if (player.fateTarget == null) player.fateTarget = 'sword_star';
     if (player.fatePoints == null) player.fatePoints = 0;
+    if (player.statPts == null) player.statPts = 0;    // 兼容旧档：无自由属性点
+    if (player.skillPts == null) player.skillPts = 0;  // 兼容旧档：无技能天赋点
+    if (player.talents == null || typeof player.talents !== 'object' || Array.isArray(player.talents)) player.talents = {};
+    if (player.str == null) player.str = 0;
+    if (player.vit == null) player.vit = 0;
+    if (player.agi == null) player.agi = 0;
+    if (player.achievements == null || typeof player.achievements !== 'object' || Array.isArray(player.achievements))
+        player.achievements = {};                                          // 成就进度（避免误用 isArray 每次读档清空）
     if (!Array.isArray(slimes)) slimes = [];
+    if (player.chests == null) player.chests = 0;                        // 兼容旧档：已开启宝箱数
 }
 
 // 兼容旧存档：补齐敌人 AI 与韧性条字段
@@ -987,6 +1465,10 @@ function hash2(gx, gy) {
     h = (h ^ (h >> 13)) | 0; h = (h * 1274126177) | 0;
     return ((h ^ (h >> 16)) >>> 0) / 4294967296;
 }
+// 群系(biome)：离中心越远，景象越荒凉。0草原 1森林 2荒漠 3火山（决定地面配色与怪物种类）
+function biomeAt(gx, gy) {
+    return zoneTier(gx, gy);   // 与"越往外怪越强"分层保持一致
+}
 function worldTile(gx, gy) {
     if (currentMap === 'cave') {
         // 洞穴出生区与返回出口留空
@@ -1001,8 +1483,8 @@ function worldTile(gx, gy) {
     if (Math.abs(gx) <= 3 && Math.abs(gy) <= 3) return 0;
     if (Math.abs(gx - GATE_WORLD.gx) <= 1 && Math.abs(gy - GATE_WORLD.gy) <= 1) return 0;
     const r = hash2(gx, gy);
-    if (r < 0.10) return 1;              // 树
-    if (r < 0.16) return 2;              // 石
+    if (r < 0.10) return 1;              // 草原/森林：树 / 荒漠：仙人掌 / 火山：石柱
+    if (r < 0.16) return 2;              // 草原：石 / 森林：木桩 / 荒漠·火山：岩石
     return 0;
 }
 // 开放世界无需预生成地形；保留占位以便地图切换时调用
@@ -1018,22 +1500,48 @@ function zoneTier(gx, gy) {
     return 3;               // 深层（极强）
 }
 // 生成一只敌人：血量/韧性随玩家等级与离中心的距离成长
+// 每种怪物的基础面板：血量基数 / 韧性 / AI / 经验 / 掉抽数
+const ENEMY_DEFS = {
+    slime:  { hp: 20, tough: 4, ai: 'normal', xp: 20, pulls: 1 },
+    bat:    { hp: 35, tough: 6, ai: 'critter', xp: 30, pulls: 2 },
+    wolf:   { hp: 30, tough: 5, ai: 'critter', xp: 26, pulls: 2 },   // 森林·敏捷猎手
+    golem:  { hp: 55, tough: 8, ai: 'defender', xp: 42, pulls: 3 },  // 荒漠·铁壁石像
+    demon:  { hp: 70, tough: 9, ai: 'boss-ish', xp: 60, pulls: 4 },  // 火山·狂暴恶魔
+};
+// 某层会出现哪些怪（越往外种类越凶）
+const TIER_ENEMIES = [
+    ['slime'],              // 0 核心
+    ['slime', 'wolf'],      // 1 次外（森林）
+    ['wolf', 'golem'],      // 2 外（荒漠）
+    ['golem', 'demon'],     // 3 深层（火山）
+];
 function makeEnemy(gx, gy, type) {
     const tier = zoneTier(gx, gy);
-    const baseHp = (type === 'bat') ? 35 : 20;
-    const hp = Math.round(baseHp + (player.lv - 1) * (type === 'bat' ? 6 : 4) + tier * 20 + Math.random() * 8);
+    const def = ENEMY_DEFS[type] || ENEMY_DEFS.slime;
+    const statMulti = 1 + (player.lv - 1) * 0.15 + tier * 0.5;
+    const hp = Math.round(def.hp * statMulti + Math.random() * 8);
+    const tough = Math.round((def.tough + tier * 2) * (type === 'golem' ? 1.2 : 1));
+    let ai = def.ai;
+    if (ai === 'boss-ish') ai = (Math.random() < 0.6 ? 'critter' : 'healer');
     return {
         gx, gy, type,
         hp, maxHp: hp,
-        ai: (type === 'bat') ? 'critter' : rollSlimeAI(),
-        tough: (type === 'bat' ? 6 : 4) + tier * 2,
-        toughMax: (type === 'bat' ? 6 : 4) + tier * 2,
+        ai,
+        tough, toughMax: tough,
         tier,
+        xp: def.xp, pulls: def.pulls,   // 击杀奖励
     };
 }
 
+// 根据所在层挑一种怪（先锋哥会带少量史莱姆）
+function pickEnemyType() {
+    const t = Math.min(3, zoneTier(Math.round(player.x / tile), Math.round(player.y / tile)));
+    const pool = TIER_ENEMIES[t];
+    return pool[(Math.random() * pool.length) | 0];
+}
+
 /* =========================================================
-   生成史莱姆（地面）/ 蝙蝠（洞穴）：在玩家所在区域按难度刷新
+   生成怪物（地面/洞穴）：在玩家所在区域按难度刷新
    ========================================================= */
 function spawnSlimes(count) {
     slimes = [];
@@ -1051,6 +1559,13 @@ function spawnBats(count) {
     slimes = [];
     let g = 0;
     while (slimes.length < count && g < 2000) { g++; tryPlace('bat'); }
+}
+
+// 按玩家当前所在层，刷一批多样化怪物
+function spawnTiered(count) {
+    slimes = [];
+    let g = 0;
+    while (slimes.length < count && g < 3000) { g++; tryPlace(pickEnemyType()); }
 }
 
 // 在玩家周围 ±26 格的范围内找空地放一只怪（不清空现有怪物）
@@ -1080,7 +1595,7 @@ function replenishWorld() {
     }
     if (boss && Math.hypot(boss.gx - pcx, boss.gy - pcy) > 40) boss = null;
     const target = (currentMap === 'cave') ? 6 : 5;
-    const type   = (currentMap === 'cave') ? 'bat' : 'slime';
+    const type   = (currentMap === 'cave') ? 'bat' : pickEnemyType();
     while (slimes.length < target && spawnOne(type)) {}   // 补足到目标数量
     // 地面偶发可选精英史莱姆王（可重复挑战，非通关目标）
     if (currentMap === 'grass' && !boss && Math.random() < 0.075) spawnBoss();
@@ -1191,48 +1706,90 @@ function draw() {
     const x0 = Math.floor(cam.x / tile), x1 = Math.ceil((cam.x + VIEW_W) / tile);
     const y0 = Math.floor(cam.y / tile), y1 = Math.ceil((cam.y + VIEW_H) / tile);
 
-    // ---- 1) 背景底色与棋盘网格（洞穴为黑色岩地）----
-    const groundA = isCave ? '#2a2a2f' : '#3f8f3f';
-    const groundB = isCave ? '#24242a' : '#378437';
+    // ---- 1) 背景底色与棋盘网格（洞穴为黑色岩地；地面随群系变色）----
+    const BIOME_GROUND = isCave
+        ? [['#2a2a2f','#24242a'],['#2a2a2f','#24242a'],['#2a2a2f','#24242a'],['#2a2a2f','#24242a']]
+        : [ ['#3f8f3f','#378437'],  // 0 草原
+            ['#2e6f3e','#26603a'],  // 1 森林(略暗)
+            ['#b09a5a','#a5904e'],  // 2 荒漠(沙黄)
+            ['#8a3a2a','#7a3020'] ]; // 3 火山(暗红)
+    let groundA = '#3f8f3f', groundB = '#378437';
+    if (!isCave) {
+        const b = Math.min(3, biomeAt(0, 0));
+        const geo = BIOME_GROUND[b] || BIOME_GROUND[0];
+        groundA = geo[0]; groundB = geo[1];
+    }
     ctx.fillStyle = groundA;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     for (let gy = y0; gy <= y1; gy++) {
         for (let gx = x0; gx <= x1; gx++) {
             const X = gx * tile - cam.x, Y = gy * tile - cam.y;
-            ctx.fillStyle = (gx + gy) % 2 === 0 ? groundA : groundB;
+            // 每个格子按其自身群系上色，世界边缘颜色渐变
+            let a = groundA, b2 = groundB;
+            if (!isCave) {
+                const g = BIOME_GROUND[Math.min(3, biomeAt(gx, gy))] || BIOME_GROUND[0];
+                a = g[0]; b2 = g[1];
+            }
+            ctx.fillStyle = (gx + gy) % 2 === 0 ? a : b2;
             ctx.fillRect(X, Y, tile, tile);
-            // 草地小草丛 / 洞穴岩缝点缀
+            // 各类地形点缀：草丛 / 苔藓 / 沙纹 / 火焰碎石
             if (worldTile(gx, gy) === 0 && Math.floor((gx*7+gy*13) % 5) === 0) {
-                ctx.fillStyle = isCave ? '#1d1d22' : '#2f6f2f';
+                ctx.fillStyle = isCave ? '#1d1d22'
+                    : ([['#2f6f2f','#1f5f2f','#8a8a5a','#ff8a3a']][0][Math.min(3, biomeAt(gx, gy))]);
                 ctx.fillRect(X + 8, Y + 8, 4, 4);
             }
         }
     }
 
-    // ---- 2) 障碍物（按地图区分外观）----
+    // ---- 2) 障碍物（按地图/群系区分外观）----
     for (let gy = y0; gy <= y1; gy++) {
         for (let gx = x0; gx <= x1; gx++) {
             const X = gx * tile - cam.x, Y = gy * tile - cam.y;
             const t = worldTile(gx, gy);
+            const bm = isCave ? -1 : Math.min(3, biomeAt(gx, gy));
             if (t === 1) {
                 if (isCave) {                        // 洞穴水晶矿
                     ctx.fillStyle = '#4a2fae'; ctx.fillRect(X+11, Y+8, 10, 18);
                     ctx.fillStyle = '#7a5aff'; ctx.fillRect(X+11, Y+8, 5, 18);
                     ctx.fillStyle = '#b39bff'; ctx.fillRect(X+11, Y+8, 2, 8);   // 冷光
-                } else {                             // 地面树木
+                } else if (bm === 0) {               // 草原树木
                     ctx.fillStyle = '#5a3a1a'; ctx.fillRect(X+12, Y+22, 8, 10);
                     ctx.fillStyle = '#2a7a2a'; ctx.beginPath();
                     ctx.arc(X+16, Y+16, 12, 0, Math.PI*2); ctx.fill();
                     ctx.fillStyle = '#379037'; ctx.beginPath();
                     ctx.arc(X+16, Y+13, 7, 0, Math.PI*2); ctx.fill();
+                } else if (bm === 1) {               // 森林深树
+                    ctx.fillStyle = '#4a3018'; ctx.fillRect(X+12, Y+22, 8, 11);
+                    ctx.fillStyle = '#1f5f2f'; ctx.beginPath();
+                    ctx.arc(X+16, Y+15, 13, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = '#2f7f3f'; ctx.beginPath();
+                    ctx.arc(X+16, Y+12, 7, 0, Math.PI*2); ctx.fill();
+                } else if (bm === 2) {               // 荒漠仙人掌
+                    ctx.fillStyle = '#5a704a'; ctx.fillRect(X+12, Y+8, 8, 20);
+                    ctx.fillStyle = '#4a603a'; ctx.fillRect(X+3, Y+13, 9, 4); ctx.fillRect(X+20, Y+12, 9, 4);
+                    ctx.fillStyle = '#ffd0a0'; ctx.fillRect(X+15, Y+4, 2, 3);
+                } else {                             // 玄武岩石柱
+                    ctx.fillStyle = '#6a3a2a'; ctx.fillRect(X+10, Y+6, 12, 20);
+                    ctx.fillStyle = '#8a4a34'; ctx.fillRect(X+10, Y+6, 12, 6);
+                    ctx.fillStyle = '#ff6a2a'; ctx.fillRect(X+8, Y+10, 2, 2); // 熔岩光点
                 }
             } else if (t === 2) {
                 if (isCave) {                        // 洞穴暗岩
                     ctx.fillStyle = '#53535b'; ctx.fillRect(X+2, Y+4, tile-4, tile-6);
                     ctx.fillStyle = '#63636d'; ctx.fillRect(X+2, Y+4, tile-4, 6);
-                } else {                             // 地面岩石
+                } else if (bm === 0) {               // 草原岩石
                     ctx.fillStyle = '#8a8a8a'; ctx.fillRect(X+3, Y+5, tile-6, tile-6);
                     ctx.fillStyle = '#a9a9a9'; ctx.fillRect(X+3, Y+5, tile-6, 6);
+                } else if (bm === 1) {               // 森林巨石（苔藓）
+                    ctx.fillStyle = '#5a6a52'; ctx.fillRect(X+2, Y+4, tile-4, tile-6);
+                    ctx.fillStyle = '#6a7a62'; ctx.fillRect(X+2, Y+4, tile-4, 7);
+                } else if (bm === 2) {               // 荒漠岩石
+                    ctx.fillStyle = '#8a7a52'; ctx.fillRect(X+3, Y+5, tile-6, tile-6);
+                    ctx.fillStyle = '#a08a62'; ctx.fillRect(X+3, Y+5, tile-6, 6);
+                } else {                             // 熔岩裂石
+                    ctx.fillStyle = '#5a2a1a'; ctx.fillRect(X+2, Y+4, tile-4, tile-6);
+                    ctx.fillStyle = '#7a3a22'; ctx.fillRect(X+2, Y+4, tile-4, 7);
+                    ctx.fillStyle = '#ff8a2a'; ctx.fillRect(X+20, Y+20, 3, 3);
                 }
             }
         }
@@ -1251,6 +1808,25 @@ function draw() {
             ctx.beginPath(); ctx.moveTo(X+16,Y+13); ctx.lineTo(X+24,Y+5); ctx.lineTo(X+19,Y+13); ctx.closePath(); ctx.fill();
             ctx.beginPath(); ctx.arc(X+16, Y+16, 8, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = '#ffd000'; ctx.fillRect(X+11,Y+14,3,3); ctx.fillRect(X+19,Y+14,3,3);
+        } else if (s.type === 'wolf') {         // 森林狼：灰身三角耳，跑得快
+            ctx.fillStyle = '#8a8a9a';
+            ctx.beginPath(); ctx.arc(X+16, Y+16, 10, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#4a4a58';           // 耳朵
+            ctx.beginPath(); ctx.moveTo(X+10,Y+8); ctx.lineTo(X+14,Y+3); ctx.lineTo(X+16,Y+9); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(X+22,Y+8); ctx.lineTo(X+18,Y+3); ctx.lineTo(X+16,Y+9); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = '#ffd000'; ctx.fillRect(X+12,Y+15,3,3); ctx.fillRect(X+19,Y+15,3,3);
+        } else if (s.type === 'golem') {        // 荒漠石像：方块岩石躯体
+            ctx.fillStyle = '#9a8a6a';
+            ctx.fillRect(X+7, Y+8, 18, 18);
+            ctx.fillStyle = '#6a5a3a'; ctx.fillRect(X+9, Y+8, 18, 5);
+            ctx.fillStyle = '#ffd95e'; ctx.fillRect(X+11, Y+15, 4, 4); ctx.fillRect(X+18, Y+15, 4, 4);
+        } else if (s.type === 'demon') {        // 火焰恶魔：尖角圆身，通体火红
+            ctx.fillStyle = '#ff5a2a';
+            ctx.beginPath(); ctx.arc(X+16, Y+17, 11, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#a01a00';           // 双角
+            ctx.beginPath(); ctx.moveTo(X+9,Y+8); ctx.lineTo(X+11,Y+1); ctx.lineTo(X+14,Y+8); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(X+23,Y+8); ctx.lineTo(X+21,Y+1); ctx.lineTo(X+18,Y+8); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = '#ffd000'; ctx.fillRect(X+11,Y+16,4,4); ctx.fillRect(X+19,Y+16,4,4);
         } else {                                // 史莱姆（绿色 → 橙 → 深红 → 紫，随外层加深）
             ctx.fillStyle = slimeColor(s.tier || 0);
             ctx.beginPath(); ctx.arc(X+16, Y+12, 11, 0, Math.PI*2); ctx.fill();
@@ -1274,6 +1850,24 @@ function draw() {
         ctx.fillStyle = '#000'; ctx.fillRect(X+9, Y+11, 5, 5); ctx.fillRect(X+19, Y+11, 5, 5);
         ctx.fillStyle = '#e0c6ff'; ctx.beginPath(); ctx.arc(X+11, Y+6, 4, 0, Math.PI*2); ctx.fill();
         drawEnemySigil(X, Y, boss.ai);
+    }
+
+    // ---- 3.7) 宝箱：金色宝箱（开启后淡出留空）----
+    for (const c of chests) {
+        const X = c.gx * tile - cam.x, Y = c.gy * tile - cam.y;
+        if (c.opened) {                        // 已开启：画个打开的空箱 + 光点
+            ctx.fillStyle = '#6a5a3a'; ctx.fillRect(X+6, Y+14, 20, 12);
+            ctx.fillStyle = '#8a7a52'; ctx.fillRect(X+6, Y+14, 20, 4);
+            continue;
+        }
+        // 未开启：金色箱体
+        ctx.fillStyle = '#b8860b'; ctx.fillRect(X+5, Y+10, 22, 16);
+        ctx.fillStyle = '#d4af37'; ctx.fillRect(X+5, Y+10, 22, 5);
+        ctx.fillStyle = '#ffd95e'; ctx.fillRect(X+13, Y+12, 6, 5);   // 锁扣
+        // 呼吸光圈提示可开启
+        const pulse = 15 + Math.floor((Date.now() / 500) % 3);
+        ctx.strokeStyle = 'rgba(255,215,120,0.65)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(X+16, Y+18, pulse, 0, Math.PI*2); ctx.stroke();
     }
 
     // ---- 3.9) 火球术：飞行火球 + 爆炸效果 ----
@@ -1356,7 +1950,9 @@ function updateHUD() {
     document.getElementById('hudMp').textContent = player.mp;
     document.getElementById('hudMaxMp').textContent = player.maxMp;
     document.getElementById('hudEnergy').textContent = Math.min(PLAYER_MAX_ENERGY, player.energy);
+    document.getElementById('hudPotions').textContent = player.potions || 0;
     document.getElementById('hudPulls').textContent = player.pulls;
+    document.getElementById('hudGold').textContent = player.gold || 0;
     // 装备栏显示（武器/防具及加成）
     const w = player.equip && player.equip.weapon;
     const a = player.equip && player.equip.armor;
@@ -1380,10 +1976,27 @@ function checkLevelUp() {
         player.atk += 3;                 // 攻击力永久 +3
         player.hp = player.maxHp;        // HP 回满
         player.mp = player.maxMp;        // MP 也回满
+        player.statPts += 3;             // 每次升级获得 3 点自由属性点
+        player.skillPts += 1;            // 每次升级获得 1 点技能天赋点
+        addPickup('✨ 升级到 ' + player.lv + ' 级！获得 3 属性点 + 1 技能点（H/T 分配）');
         updateHUD();
         refreshBossHp();                 // 若正在打 Boss，让 Boss 血量随等级补涨
         saveGame();                      // 升级后立即存档
     }
+}
+
+// ---------- 自由属性点分配 ----------
+// 力量：+1 攻击 | 体能：+8 最大HP | 敏捷：+1% 暴击
+function spendStat(stat) {
+    if (player.statPts <= 0) return;
+    if (stat === 'str') { player.str++; player.atk++; }
+    else if (stat === 'vit') { player.vit++; player.maxHp += 8; player.hp += 8; }
+    else if (stat === 'agi') { player.agi++; }
+    else return;
+    player.statPts--;
+    addPickup({ str: '力量 +1（攻击 +1）', vit: '体能 +1（最大HP +8）', agi: '敏捷 +1（暴击 +1%）' }[stat]);
+    updateHUD(); saveGame();
+    renderStatsPanel();
 }
 
 /* =========================================================
@@ -1430,11 +2043,14 @@ function refreshBattleUI() {
     document.getElementById('ultTxt').textContent = Math.min(PLAYER_MAX_ENERGY, player.energy);
     document.getElementById('ultFill').style.width = (Math.min(PLAYER_MAX_ENERGY, player.energy) / PLAYER_MAX_ENERGY * 100) + '%';
     document.getElementById('btnUlt').disabled = player.energy < PLAYER_MAX_ENERGY;
+    // 火球术按钮：用 MP 换取爆发，有蓝即可放
+    document.getElementById('btnSkill').disabled = player.mp < 10;
 }
 
-/* 敌人显示名：Boss / 蝙蝠 / 史莱姆 + 行为标签 */
+/* 敌人显示名：Boss / 各类怪物 + 行为标签 */
+const ENEMY_CN = { slime: '史莱姆', bat: '蝙蝠', wolf: '森林野狼', golem: '荒漠石像', demon: '火焰恶魔' };
 function enemyName(e) {
-    let nm = (e === boss) ? 'Boss 史莱姆王' : (e.type === 'bat' ? '蝙蝠' : '史莱姆');
+    let nm = (e === boss) ? 'Boss 史莱姆王' : (ENEMY_CN[e.type] || '史莱姆');
     return nm + ' [ ' + enemyTag(e) + ' ]';
 }
 // 行为标签文案
@@ -1451,7 +2067,10 @@ function enemyTag(e) {
 function enemyBaseDmg(e) {
     let base = 6 + Math.floor(Math.random() * 5);   // 6-10
     if (e === boss) base += 8;                       // Boss 更凶
-    else if (e.type === 'bat') base += 4;            // 蝙蝠更强
+    else {
+        const bonus = { bat: 4, wolf: 5, golem: 6, demon: 9 }[e.type] || 0;
+        base += bonus;
+    }
     base += (e.tier || 0) * 2;                       // 越往外的怪越疼
     return base;
 }
@@ -1472,20 +2091,29 @@ function setBattleLog(txt, cls) {
 /* 结束战斗并移除被击败的史莱姆 */
 function endBattle(won) {
     if (won) {
+        // 战地再生天赋：获胜回复 20%/级 最大HP（配合战利品快速再战）
+        const regenLv = talLv('regen');
+        if (regenLv > 0 && player.hp < player.maxHp) {
+            const r = Math.round(player.maxHp * 0.20 * regenLv);
+            player.hp = Math.min(player.maxHp, player.hp + r);
+            addPickup('🌿 战地再生：回复 ' + r + ' HP！');
+        }
         const idx = slimes.indexOf(battling);
         if (idx > -1) {
-            slimes.splice(idx, 1);          // 地图上移除该史莱姆
-            // 更强敌人奖励更多经验：蝙蝠 30，史莱姆 20
-            // 越往外的怪经验越多：蝙蝠 30 / 史莱姆 20，每层 +15
-            gainXP((battling.type === 'bat' ? 30 : 20) + (battling.tier || 0) * 15);
+            slimes.splice(idx, 1);          // 地图上移除该怪物
+            // 每类怪有独立经验/掉落；越往外的怪基础越高
+            upKillCount(battling.type);      // 记录图鉴击杀
+            gainXP((battling.xp != null ? battling.xp : (battling.type === 'bat' ? 30 : 20))
+                   + (battling.tier || 0) * 15);
             giveEnemyLoot(battling.type);    // 掉落装备
-            dropPulls(battling.type);        // 掉落抽数
+            resolvePulls(battling);          // 掉落抽数（按怪物种类）
         } else if (battling === boss) {     // 击败可选精英史莱姆王
             boss = null;
             gainXP(80);                     // 奖励大量经验
             giveEnemyLoot('boss');           // 必掉强力装备
-            dropPulls('boss');               // 掉落 5 抽数
-            addPickup('👑 击败精英史莱姆王！怪物环绕，可继续自由冒险');
+            dropPulls2(5);                   // 掉落 5 抽数
+            player.skillPts += 1;            // 额外奖励 1 技能天赋点
+            addPickup('👑 击败精英史莱姆王！+1 技能点，可继续自由冒险');
         }
     }
     battling = null;
@@ -1501,7 +2129,7 @@ function endBattle(won) {
 // 施放火球（需满足：非战斗、冷却结束、MP 充足、正在朝某个方向移动过）
 function castFireball() {
     if (battling || fireCool > 0 || player.mp < 10) return;
-    player.mp -= 10;                 // 消耗 10 MP
+    player.mp -= Math.max(1, 10 - talLv('mana'));   // 魔力泉天赋：MP 消耗 -1/级
     fireCool = 3;                    // 冷却 3 秒
     // 火球从玩家中心出发，沿面向方向飞行
     fireball = {
@@ -1524,10 +2152,11 @@ function explodeEnemies(ex, ey, damage, radius) {
         if (Math.hypot(sx-cx, sy-cy) <= radius) {
             s.hp -= damage;
             if (s.hp <= 0) {
-                slimes.splice(i, 1);   // 火球直接消灭史莱姆 + 经验
-                gainXP(s.type === 'bat' ? 30 : 20);
+                slimes.splice(i, 1);   // 火球直接消灭怪物 + 经验
+                upKillCount(s.type);    // 记录图鉴击杀
+                gainXP((s.xp != null ? s.xp : (s.type === 'bat' ? 30 : 20)) + (s.tier || 0) * 15);
                 giveEnemyLoot(s.type);  // 火球击杀同样掉落装备
-                dropPulls(s.type);      // 火球击杀同样掉落抽数
+                resolvePulls(s);        // 火球击杀同样掉落抽数
             }
         }
     }
@@ -1539,8 +2168,9 @@ function explodeEnemies(ex, ey, damage, radius) {
             if (boss.hp <= 0) {         // 火球击倒可选精英
                 boss = null;
                 giveEnemyLoot('boss');   // 火球击倒同样掉落装备与抽数
-                dropPulls('boss');
-                addPickup('👑 火球轰倒精英史莱姆王！可继续自由冒险');
+                dropPulls2(5);
+                player.skillPts += 1;            // 额外奖励 1 技能天赋点
+                addPickup('👑 火球轰倒精英史莱姆王！+1 技能点');
             }
         }
     }
@@ -1557,10 +2187,10 @@ function updateFireball(dt) {
     const gx = Math.floor(fireball.x / tile), gy = Math.floor(fireball.y / tile);
     const hitWall = worldTile(gx, gy) !== 0;   // 无限世界中撞到 树/石/水晶 即爆炸
     if (hitWall) {
-        explodeEnemies(fireball.x, fireball.y, 30, 70);   // 伤害 30，范围 70px
+        explodeEnemies(fireball.x, fireball.y, Math.round(30 * talMult('pyre', 0.12)), 70);   // 伤害 30，范围 70px
         fireball = null;
     } else if (songDidFireTravelFar()) {                  // 飞太远也会自爆
-        explodeEnemies(fireball.x, fireball.y, 30, 70);
+        explodeEnemies(fireball.x, fireball.y, Math.round(30 * talMult('pyre', 0.12)), 70);
         fireball = null;
     }
 }
@@ -1595,14 +2225,14 @@ function onAttack() {
     // 伤害倍率 = 破盾 × 连击；另有 10% 暴击
     combo++;
     effCombo = Math.min(6, combo);
-    let mult = (enemyBroken ? 1.5 : 1) * (1 + Math.max(0, effCombo - 1) * 0.1);
-    const crit = Math.random() < 0.10;
-    let dmg = Math.round((effAtk() + Math.floor(Math.random() * 6)) * mult);
+    let mult = (enemyBroken ? 1.5 : 1) * (1 + Math.max(0, effCombo - 1) * (0.10 + 0.03 * talLv('frenzy')));
+    const crit = Math.random() < playerCrit();
+    let dmg = Math.round((effAtk() + Math.floor(Math.random() * 6)) * mult * talMult('heavy', 0.06));
     if (crit) dmg = Math.round(dmg * 1.6);
     if (guard) dmg = Math.floor(dmg * 0.5);
 
-    // 普攻累积大招能量
-    player.energy = Math.min(PLAYER_MAX_ENERGY, player.energy + 25);
+    // 普攻累积大招能量（元素爆发天赋 +15%/级 → 更快充能）
+    player.energy = Math.min(PLAYER_MAX_ENERGY, player.energy + Math.round(25 * talMult('surge', 0.15)));
 
     let log = '你造成 ' + dmg + ' 点伤害' + (crit ? '（暴击！）' : '')
             + (enemyBroken ? '（破盾+50%）' : '') + '（连击 x' + effCombo + '）！';
@@ -1642,13 +2272,36 @@ function onUlt() {
     resolvePlayerHit({ dmg, broke, isBonus, log: log, big: true });
 }
 
+/* 战斗技能·火球术：消耗 10 MP，瞬发高爆发 + 几乎必破盾（与野图火球共用成本） */
+function onBattleSkill() {
+    if (!battling || player.mp < 10) return;
+    const e = battling;
+    const isBonus = bonusTurn; bonusTurn = false;
+    player.mp -= Math.max(1, 10 - talLv('mana'));    // 魔力泉天赋：MP 消耗 -1/级
+    // 火球术强破盾（几乎必破），高额固定附加伤害；御火术天赋 +12%/级
+    const broke = !enemyBroken;
+    if (broke) { e.tough = 0; enemyBroken = true; }
+    const crit = Math.random() < playerCrit();
+    let dmg = Math.round(((effAtk() * 1.4) + 14) * talMult('pyre', 0.12));
+    if (crit) dmg = Math.round(dmg * 1.6);
+    if (enemyBroken) dmg = Math.round(dmg * 1.5);
+    // 技能不攒大招能量，用蓝换取爆发的代价
+    combo++;
+    effCombo = Math.min(6, combo);
+    let log = '🔥 你释放火球术！造成 ' + dmg + ' 点伤害' + (crit ? '（暴击！）' : '')
+            + (enemyBroken ? '（破盾+50%）' : '') + '！';
+    if (crit) juiceCrit();
+    updateHUD();
+    resolvePlayerHit({ dmg, broke, isBonus, log: log, big: true });
+}
+
 // 是否为"大数字"（大招/连击高）用于着色
 function criticised() { return effCombo >= 3; }
 
 /* 削减韧性：返回本次攻击是否刚好把韧性打空（破盾） */
 function reduceToughness(e) {
     if (e.tough > 0) {
-        e.tough -= 2;
+        e.tough -= (2 + talLv('break'));     // 破甲天赋：+1/级削韧
         if (e.tough <= 0) { e.tough = 0; return true; }
     }
     return false;
@@ -1732,11 +2385,12 @@ function runEnemyTurn() {
         msg = nm + ' 发起攻击！';
     }
 
-    // 施加伤害（含防御减伤）并结算受击回能
+    // 施加伤害（含防御减伤+铁壁天赋）并结算受击回能
     if (defend) dmg = Math.floor(dmg * 0.5);
+    dmg = Math.floor(dmg * (1 - 0.06 * talLv('bulwark')));   // 铁壁天赋：-6%/级
     player.hp -= dmg;
     if (player.hp < 0) player.hp = 0;
-    player.energy = Math.min(PLAYER_MAX_ENERGY, player.energy + 15);   // 受击回能
+    player.energy = Math.min(PLAYER_MAX_ENERGY, Math.round(player.energy + 15 * talMult('surge', 0.15)));   // 受击回能
     msg += ' 造成 ' + dmg + ' 点伤害' + (crit ? '（暴击！）' : '') + (defend ? '（已减伤）' : '') + '！';
     if (crit) juiceCrit();
     applyEnemyTurn(dmg, msg);
@@ -1758,7 +2412,7 @@ function applyEnemyTurn(dmg, msg, charging) {
 
 // 敌人无标签的简短名（用于对话）
 function enemyPlainName(e) {
-    return (e === boss) ? '史莱姆王' : (e.type === 'bat' ? '蝙蝠' : '史莱姆');
+    return (e === boss) ? '史莱姆王' : (ENEMY_CN[e.type] || '史莱姆');
 }
 
 function restoreDefend() { defend = false; }
@@ -1779,6 +2433,13 @@ document.addEventListener('keydown', e => {
     }
     // Q：在地图释放火球术
     if (k === 'q' && !battling) castFireball();
+    // E：开启附近的宝箱
+    if (k === 'e' && !battling) {
+        const c = nearChest();
+        if (c) { e.preventDefault(); openChest(c); }
+    }
+    // 1：饮用治愈药水（战斗/野图皆可，遇命满或药尽则返回）
+    if (k === '1') { drinkPotion(); }
     // Enter：站在洞穴入口(400,300)进洞穴；站在洞穴出口(656,272)返回地面
     if (k === 'enter' && !battling) {
         if (currentMap === 'grass' && nearWorld(GATE_WORLD.gx * tile + 16, GATE_WORLD.gy * tile + 16)) enterCave();
@@ -1791,6 +2452,29 @@ document.addEventListener('keydown', e => {
 });
 document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
+let dashCool = 0, dashFx = 0;   // 冲刺冷却(秒) / 冲刺特效残影帧（顶层定义，避免每次循环重置）
+
+// 冲刺：按 Shift 朝面向方向突进 3 格（消耗 15 MP，冷却 2s）
+document.addEventListener('keydown', e => {
+    if ((e.key === 'Shift' || e.key.toLowerCase() === 'shift')
+        && gameStarted && !battling && !panelsOpen() && dashCool <= 0 && player.mp >= 15) {
+        player.mp -= 15;
+        dashCool = Math.max(0.6, 2 - 0.4 * talLv('sprint'));   // 冲刺疾影：冷却 -0.4s/级
+        dashFx = 6;
+        const steps = 90;
+        for (let i = 0; i < steps; i++) {
+            const nx = player.x + player.dirX, ny = player.y + player.dirY;
+            if (!collides(nx, player.y)) player.x = nx;
+            if (!collides(player.x, ny)) player.y = ny;
+        }
+        addPickup('💨 冲刺！');
+        updateHUD();
+    }
+});
+
+// 按 Shift 冲刺——绑定到按键（Shift 需单独处理，只注册一次）
+document.addEventListener('keydown', e => { if (e.key === 'Shift') e.preventDefault(); });
+
 /* =========================================================
    主循环：读键 -> 移动 -> 更新火球 -> 绘制 -> 刷新 HUD
    ========================================================= */
@@ -1800,8 +2484,12 @@ function gameLoop(t) {
     const dt = lastTime ? Math.min(0.1, (t - lastTime) / 1000) : 0.016;
     lastTime = t;
 
+    // 推进冲刺冷却与残影帧
+    if (dashCool > 0) dashCool = Math.max(0, dashCool - dt);
+    if (dashFx > 0) dashFx--;
+
     if (!battling && !panelsOpen()) {   // 战斗中冻结移动；面板打开时也冻结
-        const spd = 3;
+        const spd = Math.round(3 * talMult('stride', 0.12));   // 迅捷天赋：移动速度 +12%/级
         if (keys['w']) { move(0, -spd); player.dirX = 0;  player.dirY = -1; }
         if (keys['s']) { move(0,  spd); player.dirX = 0;  player.dirY =  1; }
         if (keys['a']) { move(-spd, 0); player.dirX = -1; player.dirY = 0; }
@@ -1812,14 +2500,24 @@ function gameLoop(t) {
     if (explosion && explosion.ttl > 0) explosion.ttl--;
     if (explosion && explosion.ttl <= 0) explosion = null;
 
-    // 每 4 秒自动存档一次，实时保存玩家进度
+    // 每 12 秒自动存档一次（开放世界怪按玩家位置重建，无需高频存储）
     autoSaveTimer += dt;
-    if (autoSaveTimer >= 4) { autoSaveTimer = 0; saveGame(); }
+    if (autoSaveTimer >= 12) { autoSaveTimer = 0; saveGame(); }
 
-    // 开放世界：每 5 秒补充敌人至目标数量，保证随时有怪可打
+    // 开放世界：每 8 秒补充敌人至目标数量，保证随时有怪可打
     if (!battling) {
         respawnTimer += dt;
-        if (respawnTimer >= 5) { respawnTimer = 0; replenishWorld(); }
+        if (respawnTimer >= 8) { respawnTimer = 0; replenishWorld(); }
+        // 战斗外缓慢回蓝（MP 用于技能/冲刺）
+        if (player.mp < player.maxMp) {
+            mpRegen += dt;
+            if (mpRegen >= 3) {
+                mpRegen = 0;
+                player.mp = Math.min(player.maxMp, player.mp + 5);
+                updateHUD();
+            }
+        }
+        tickChests(dt);     // 宝箱刷新 + 补充
     }
 
     draw();
@@ -1834,7 +2532,7 @@ let autoSaveTimer = 0;
    重置游戏
    ========================================================= */
 function resetGame() {
-    player = { x: 0, y: 0, lv: 1, hp: 100, maxHp: 100, mp: 50, maxMp: 50, energy: 0, pulls: 0, pityTotal: 0, pity4: 0, gachaGuarantee: false, fateTarget: 'sword_star', fatePoints: 0, atk: 10, xp: 0, xpNeed: 100, dirX: 1, dirY: 0, equip: { weapon: null, armor: null }, inventory: [] };
+    player = { x: 0, y: 0, lv: 1, hp: 100, maxHp: 100, mp: 50, maxMp: 50, energy: 0, pulls: 0, potions: 0, gold: 0, pityTotal: 0, pity4: 0, gachaGuarantee: false, fateTarget: 'sword_star', fatePoints: 0, atk: 10, xp: 0, xpNeed: 100, statPts: 0, skillPts: 0, talents: {}, str: 0, vit: 0, agi: 0, dirX: 1, dirY: 0, equip: { weapon: null, armor: null }, inventory: [], achievements: {}, chests: 0 };
     currentMap = 'grass';                                  // 回到地面世界
     boss = null;
     fireCool = 0; fireball = null; explosion = null;   // 重置火球状态
@@ -1851,16 +2549,10 @@ function resetGame() {
    ========================================================= */
 const SAVE_KEY = 'rpgMiniGameSave';
 
-// 保存存档（含玩家属性、地图数据、敌人与 Boss 状态）
+// 保存存档：只存玩家与所处地图，怪物按玩家位置在读取时重建
 function saveGame() {
     if (player.hp <= 0) return;                 // 死亡状态下不覆盖存档
-    const data = {
-        player: player,
-        currentMap: currentMap,
-        map: map,
-        slimes: slimes,
-        boss: boss,
-    };
+    const data = { player: player, currentMap: currentMap };
     try {
         localStorage.setItem(SAVE_KEY, JSON.stringify(data));
         savedFlash();                            // 弹出"已自动保存"提示
@@ -1946,6 +2638,7 @@ function continueGame() {
 document.getElementById('btnAttack').addEventListener('click', onAttack);
 document.getElementById('btnDefend').addEventListener('click', onDefend);
 document.getElementById('btnUlt').addEventListener('click', onUlt);
+document.getElementById('btnSkill').addEventListener('click', onBattleSkill);
 document.getElementById('btnStart').addEventListener('click', startNewGame);
 document.getElementById('btnContinue').addEventListener('click', continueGame);
 
@@ -1974,10 +2667,10 @@ const CODE_VERSION = 'RPG1';
 
 // 收集一份可序列化的存档数据（游戏中取当前状态；开始屏优先取已存存档）
 function collectSaveData() {
-    if (gameStarted) return { player, currentMap, slimes, boss };
+    if (gameStarted) return { player, currentMap };
     let stored = null;
     try { stored = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) {}
-    return stored || { player, currentMap, slimes, boss };
+    return stored || { player, currentMap };
 }
 
 // 存档数据 -> 存档码（base64 + 校验和，便于跨浏览器搬运）
@@ -2106,7 +2799,7 @@ document.addEventListener('keydown', e => {
 });
 // 按 Escape 关闭面板
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeSavePanel(); closeEqPanel(); closeGachaPanel(); }
+    if (e.key === 'Escape') { closeSavePanel(); closeEqPanel(); closeGachaPanel(); closeStatPanel(); closeJournalPanel(); closeTalentPanel(); closeShopPanel(); }
 });
 
 /* =========================================================
@@ -2115,20 +2808,26 @@ document.addEventListener('keydown', e => {
 function panelsOpen() {
     return document.getElementById('eqPanel').style.display === 'flex'
         || document.getElementById('savePanel').style.display === 'flex'
-        || document.getElementById('gachaPanel').style.display === 'flex';
+        || document.getElementById('gachaPanel').style.display === 'flex'
+        || document.getElementById('statPanel').style.display === 'flex'
+        || document.getElementById('journalPanel').style.display === 'flex'
+        || document.getElementById('talentPanel').style.display === 'flex'
+        || document.getElementById('shopPanel').style.display === 'flex';
 }
 
 function renderEquipment() {
     const w = player.equip.weapon, a = player.equip.armor;
+    // 展示物品文本（基础属性 + 副词条）
+    const itTxt = it => it.desc + (it.afo ? ' ｜' + affixText(it) : '');
     // 已装备物品：可拖拽的 eqItem（拖回背包即卸下）
     const eq = (it, slot) => it
         ? '<span class="eqItem" draggable="true" data-eqslot="' + slot + '">' + it.name
-          + ' <span class="stat">' + (slot === 'weapon' ? '⚔' : '🛡') + it.desc + '</span></span>'
+          + ' <span class="stat">' + (slot === 'weapon' ? '⚔' : '🛡') + itTxt(it) + '</span></span>'
         : '<span class="eqEmpty">空 · 拖入装备</span>';
     document.getElementById('eqWeapon').innerHTML = eq(w, 'weapon');
     document.getElementById('eqArmor').innerHTML  = eq(a, 'armor');
 
-    // 背包物品：可拖拽卡片
+    // 背包物品：可拖拽卡片 + 重铸按钮
     const list = document.getElementById('eqInvList');
     document.getElementById('eqCount').textContent = player.inventory.length;
     if (player.inventory.length === 0) {
@@ -2142,8 +2841,16 @@ function renderEquipment() {
         card.draggable = true;
         card.dataset.idx = i;
         card.innerHTML = '<span>' + it.name
-            + '<span class="stat"> ' + (it.type === 'weapon' ? '⚔' : '🛡') + ' ' + it.desc + '</span></span>';
+            + '<span class="stat"> ' + (it.type === 'weapon' ? '⚔' : '🛡') + ' ' + itTxt(it) + '</span></span>'
+            + '<button class="recastBtn" data-idx="' + i + '" title="花金币刷一条副词条">⚒ 重铸</button>';
         list.appendChild(card);
+    });
+    // 绑定重铸按钮
+    list.querySelectorAll('.recastBtn').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.stopPropagation(); e.preventDefault();
+            recastItem(player.inventory[+btn.dataset.idx]);
+        });
     });
 }
 
@@ -2267,6 +2974,7 @@ function doPull() {
     player.pulls--;
     player.pityTotal++;        // 传说保底计数
     player.pity4++;            // 4星(史诗)保底计数
+    if (typeof updatePullsSpent === 'function') updatePullsSpent();   // 记录累计抽数（图鉴成就）
 
     // ---- 决定本次抽到的星级档位 ----
     let tier;                                       // 'legend' | 'epic' | 'rare' | 'common'
@@ -2322,12 +3030,10 @@ function doPull() {
 function grantPullReward(chosen, tier) {
     const res = document.getElementById('gachaResult');
     const isUp = chosen.item === UP_ITEM;              // 是否抽中 UP 传说
-    if (chosen.item === 'potion') {                    // 药水：立即回血
-        const heal = Math.min(player.maxHp, player.hp + 60);
-        const got = heal - player.hp;
-        player.hp = heal;
+    if (chosen.item === 'potion') {                    // 药水：存入背包，供按 1 随时饮用
+        player.potions += 1;
         res.className = 'r-common pull-new';
-        res.textContent = '🍶 ' + chosen.name + '：回复 ' + got + ' HP！';
+        res.textContent = '🍶 ' + chosen.name + ' +1（按 1 饮用回血）';
     } else {                                           // 装备
         addItem(chosen.item);
         res.className = RARITY_CLS[chosen.rarity] + ' pull-new'
@@ -2371,6 +3077,289 @@ document.addEventListener('keydown', e => {
 document.getElementById('btnPull1').addEventListener('click', () => doPull());
 document.getElementById('btnCloseGacha').addEventListener('click', closeGachaPanel);
 renderGachaPool();
+
+/* =========================================================
+   属性加点面板（按 H 呼出）：显示自由属性与分配
+   ========================================================= */
+function renderStatsPanel() {
+    document.getElementById('statPtsTxt').textContent = player.statPts;
+    document.getElementById('statStr').textContent = player.str || 0;
+    document.getElementById('statVit').textContent = player.vit || 0;
+    document.getElementById('statAgi').textContent = player.agi || 0;
+    document.getElementById('statCurAtk').textContent = effAtk();
+    document.getElementById('statCurHp').textContent = player.maxHp;
+    document.getElementById('statCurCrit').textContent = Math.round(playerCrit() * 100);
+    document.querySelectorAll('.statBtn').forEach(b => {
+        b.disabled = player.statPts <= 0;
+    });
+}
+function openStatPanel() {
+    closeSavePanel(); closeEqPanel(); closeGachaPanel();
+    document.getElementById('statPanel').style.display = 'flex';
+    renderStatsPanel();
+}
+function closeStatPanel() { document.getElementById('statPanel').style.display = 'none'; }
+function toggleStatPanel() {
+    if (document.getElementById('statPanel').style.display === 'flex') closeStatPanel();
+    else openStatPanel();
+}
+// H 键呼出属性面板；面板内 ＋ 按钮加点
+document.addEventListener('keydown', e => {
+    if (e.key.toLowerCase() === 'h' && gameStarted && !battling && !panelsOpen()) toggleStatPanel();
+});
+document.querySelectorAll('.statBtn').forEach(b => {
+    b.addEventListener('click', () => spendStat(b.dataset.stat));
+});
+document.getElementById('btnCloseStat').addEventListener('click', closeStatPanel);
+
+/* =========================================================
+   技能天赋系统（按 T 呼出）：四系天赋被动强化
+   天赋点来源：每升 1 级 +1，击败精英史莱姆王额外 +1
+   ========================================================= */
+const TALENT_DEFS = [
+    { sec: '⚔ 战技系', color: '#ff8a5a', skills: [
+        { key: 'heavy',   name: '重击',   desc: '普攻/技能伤害 +6%/级', max: 3 },
+        { key: 'break',   name: '破甲',   desc: '攻击削减韧性 +1/级',  max: 3 },
+        { key: 'frenzy',  name: '狂怒',   desc: '连击每层伤害 +?%',    max: 3 },
+    ]},
+    { sec: '🔥 巫术系', color: '#7ab0ff', skills: [
+        { key: 'pyre',    name: '御火术', desc: '火球术/火球技能伤害 +12%/级', max: 3 },
+        { key: 'mana',    name: '魔力泉', desc: '火球/冲刺 MP 消耗 -1/级',     max: 3 },
+        { key: 'surge',   name: '元素爆发', desc: '普攻/受击大招能量 +15%/级', max: 3 },
+    ]},
+    { sec: '🛡 坚韧系', color: '#9fe0a0', skills: [
+        { key: 'bulwark', name: '铁壁',   desc: '受到伤害 -6%/级',    max: 3 },
+        { key: 'alchemy', name: '药剂精通', desc: '药水回复 +15%/级', max: 3 },
+        { key: 'regen',   name: '战地再生', desc: '战斗获胜回复 20%/级 最大HP', max: 3 },
+    ]},
+    { sec: '💨 疾风系', color: '#d0d888', skills: [
+        { key: 'stride',  name: '迅捷',   desc: '移动速度 +12%/级', max: 3 },
+        { key: 'marksman',name: '百步穿杨', desc: '暴击率 +2%/级',    max: 3 },
+        { key: 'sprint',  name: '冲刺疾影', desc: '冲刺冷却 -0.4s/级', max: 3 },
+    ]},
+];
+// 查询某天赋等级
+function talLv(key) { return (player.talents && player.talents[key]) || 0; }
+// 天赋加成辅助：返回 (1 + rate * lv)
+function talMult(key, rate) { return 1 + rate * talLv(key); }
+
+// 渲染整棵天赋树
+function renderTalentTree() {
+    document.getElementById('talentPtsTxt').textContent = player.skillPts || 0;
+    const tree = document.getElementById('talentTree');
+    let html = '';
+    TALENT_DEFS.forEach(line => {
+        html += '<div class="tal-line"><div class="tal-secHead" style="color:' + line.color + '">' + line.sec + '</div>';
+        line.skills.forEach(s => {
+            const lv = talLv(s.key);
+            // 狂怒天赋的动态描述：每层连击伤害加成随等级增强
+            let desc = s.desc;
+            if (s.key === 'frenzy') desc = '连击每层伤害加成 10%+3%/级';
+            html += '<div class="tal-node">'
+                + '<div><div class="nName" style="color:' + line.color + '">' + s.name + '</div>'
+                + '<div class="nDesc">' + desc + '</div>'
+                + '<div class="nLv">等级 <b>' + lv + '</b>/' + s.max + '</div></div>'
+                + '<button class="nBtn" data-tkey="' + s.key + '" disabled="disabled"></button>'
+                + '</div>';
+        });
+        html += '</div>';
+    });
+    tree.innerHTML = html;
+    // 绑定各节点按钮：根据剩余点数与当前等级决定按钮文案/可用性
+    tree.querySelectorAll('.tal-node').forEach((node, i) => {
+        const btn = node.querySelector('.nBtn');
+        const tkey = btn.dataset.tkey;
+        const def = TALENT_DEFS.flatMap(l => l.skills).find(s => s.key === tkey);
+        const lv = talLv(tkey);
+        if (lv < def.max) {
+            btn.disabled = (player.skillPts || 0) <= 0;
+            btn.textContent = (player.skillPts || 0) <= 0 ? '⛔ 无点数' : '+ 升级';
+            btn.addEventListener('click', () => spendTalent(tkey));
+        } else {
+            btn.disabled = true;
+            btn.textContent = '✓ 满级';
+        }
+    });
+}
+function setTalentMsg(txt, isErr) {
+    const el = document.getElementById('talentMsg');
+    el.textContent = txt;
+    el.className = isErr ? 'err' : '';
+}
+// 花费 1 点技能点学习/升级天赋
+function spendTalent(key) {
+    if ((player.skillPts || 0) <= 0) { setTalentMsg('没有可用技能点！', true); return; }
+    const def = TALENT_DEFS.flatMap(l => l.skills).find(s => s.key === key);
+    if (!def) return;
+    if (talLv(key) >= def.max) { setTalentMsg('该天赋已满级！', true); return; }
+    player.skillPts--;
+    player.talents[key] = talLv(key) + 1;
+    addPickup('🌳 习得天赋「' + def.name + '」（' + player.talents[key] + '/' + def.max + '级）');
+    renderTalentTree();
+    updateHUD();
+    saveGame();
+    setTalentMsg('已升级「' + def.name + '」至 ' + player.talents[key] + ' 级！');
+}
+function openTalentPanel() {
+    closeSavePanel(); closeEqPanel(); closeGachaPanel(); closeStatPanel(); closeJournalPanel(); closeShopPanel();
+    renderTalentTree();
+    setTalentMsg('升级或击败精英史莱姆王可获得技能点。', false);
+    document.getElementById('talentPanel').style.display = 'flex';
+}
+function closeTalentPanel() { document.getElementById('talentPanel').style.display = 'none'; }
+function toggleTalentPanel() {
+    if (document.getElementById('talentPanel').style.display === 'flex') closeTalentPanel();
+    else openTalentPanel();
+}
+// T 键呼出天赋
+document.addEventListener('keydown', e => {
+    if (e.key.toLowerCase() === 't' && gameStarted && !battling && !panelsOpen()) toggleTalentPanel();
+});
+document.getElementById('btnCloseTalent').addEventListener('click', closeTalentPanel);
+
+/* =========================================================
+   克雷姆商店（按 O 呼出）：用金币购买装备/药水/抽数
+   ========================================================= */
+const SHOP_ITEMS = [
+    { key: 'iron_sword',    name: '铁剑',        price: 120, make: () => { addItem('iron_sword'); },   desc: '基础攻击装备' },
+    { key: 'leather_armor', name: '皮甲',        price: 150, make: () => { addItem('leather_armor'); }, desc: '基础防御装备' },
+    { key: 'hero_sword',    name: '勇者之剑',    price: 320, make: () => { addItem('hero_sword'); },    desc: '可靠的中坚武器' },
+    { key: 'crystal_armor', name: '水晶战甲',    price: 380, make: () => { addItem('crystal_armor'); }, desc: '优质防御装备' },
+    { key: 'potion',        name: '治愈药水',    price: 60,  make: () => { player.potions += 1; },      desc: '饮用回血（按 1）' },
+    { key: 'pulls',         name: '抽数 ×2',     price: 90,  make: () => { player.pulls += 2; },        desc: '用于卡池抽取' },
+];
+// 商店随机上架的传说/限定极品（每打开商店随机刷几件）
+function shopJackpot() {
+    const pool = [
+        { key: 'sword_sun',     name: '圣剑·晨曦', price: 900,  make: () => { addItem('sword_sun'); },     desc: '稀有武器' },
+        { key: 'armor_mithril', name: '秘银战铠',  price: 1100, make: () => { addItem('armor_mithril'); }, desc: '稀有防具' },
+        { key: 'sword_legend',  name: '传说·光暗之刃', price: 2600, make: () => { addItem('sword_legend'); }, desc: '传说武器' },
+        { key: 'sword_star',    name: '星河之刃',  price: 2400, make: () => { addItem('sword_star'); },    desc: '限定武器' },
+        { key: 'armor_void',    name: '虚空重甲',  price: 3000, make: () => { addItem('armor_void'); },    desc: '限定防具' },
+    ];
+    const picked = [];
+    const n = 1 + ((Math.random() * 3) | 0);
+    for (let i = 0; i < n; i++) picked.push(pool[(Math.random() * pool.length) | 0]);
+    return picked;
+}
+let shopStock = [];
+function renderShop() {
+    const joined = SHOP_ITEMS.concat(shopStock);
+    document.getElementById('shopGoldTxt').textContent = player.gold || 0;
+    const here = document.getElementById('shopList');
+    if (joined.length === 0) { here.innerHTML = '<div class="empty">货架被搬空了。</div>'; return; }
+    here.innerHTML = '';
+    joined.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'shopItem';
+        row.innerHTML = '<span><span class="siName">' + item.name + '</span>'
+            + '<span class="siDesc">' + item.desc + '</span></span>'
+            + '<span class="siPrice">💰 ' + item.price + '</span>'
+            + '<button data-buykey="' + item.key + '">购买</button>';
+        here.appendChild(row);
+    });
+    here.querySelectorAll('button[data-buykey]').forEach(b => {
+        b.addEventListener('click', () => {
+            const key = b.dataset.buykey;
+            const src = joined.find(s => s.key === key);
+            if (!src) return;
+            if ((player.gold || 0) < src.price) { setShopMsg('金币不足！', true); return; }
+            player.gold -= src.price;
+            src.make();
+            updateHUD(); saveGame();
+            setShopMsg('已购买 ' + src.name + '（💸 花 ' + src.price + ' 金币）', false);
+            renderShop();
+        });
+    });
+}
+function setShopMsg(txt, err) {
+    const el = document.getElementById('shopMsg');
+    el.textContent = txt;
+    el.className = err ? 'err' : '';
+}
+function openShopPanel() {
+    closeSavePanel(); closeEqPanel(); closeGachaPanel(); closeStatPanel(); closeJournalPanel(); closeTalentPanel();
+    shopStock = shopJackpot();       // 每次打开随机刷新传说货架
+    setShopMsg('欢迎光临！这里能买到装备、药水和抽数。', false);
+    renderShop();
+    document.getElementById('shopPanel').style.display = 'flex';
+}
+function closeShopPanel() { document.getElementById('shopPanel').style.display = 'none'; }
+function toggleShopPanel() {
+    if (document.getElementById('shopPanel').style.display === 'flex') closeShopPanel();
+    else openShopPanel();
+}
+// O 键呼出商店
+document.addEventListener('keydown', e => {
+    if (e.key.toLowerCase() === 'o' && gameStarted && !battling && !panelsOpen()) toggleShopPanel();
+});
+document.getElementById('btnCloseShop').addEventListener('click', closeShopPanel);
+
+/* =========================================================
+   成就 / 图鉴面板（按 J 呼出）：怪物图鉴 + 冒险成就
+   ========================================================= */
+// 图鉴内怪物列表与简介
+const BESTIARY = [
+    { type: 'slime', name: '史莱姆',   blk: '核心区常见 · 温和的绿色软泥' },
+    { type: 'wolf',  name: '森林野狼', blk: '次外层出没 · 敏捷猎手' },
+    { type: 'golem', name: '荒漠石像', blk: '外层出没 · 铁壁身躯' },
+    { type: 'demon', name: '火焰恶魔', blk: '深层火山 · 狂暴破坏者' },
+    { type: 'bat',   name: '洞穴蝙蝠', blk: '黑暗洞穴 · 紫翼夜袭' },
+];
+// 成就定义：{ desc, need, get(progress) }，get 返回当前进度数值
+const ACHIEVEMENTS = [
+    { desc: '初出茅庐：击败 10 只怪物',       need: 10, get: () => totalKills() },
+    { desc: '狩猎大师：击败 30 只怪物',       need: 30, get: () => totalKills() },
+    { desc: '浴血斗士：升级到 5 级',          need: 5,  get: () => player.lv },
+    { desc: '装备达人：拥有 6 件装备',        need: 6,  get: () => player.inventory.length },
+    { desc: '寻宝能手：开启 5 个宝箱',        need: 5,  get: () => player.chests || 0 },
+    { desc: '金库钥匙：开启 15 个宝箱',       need: 15, get: () => player.chests || 0 },
+    { desc: '抽卡欧皇：累计抽取 10 次',       need: 10, get: () => pullsSpent() },
+    { desc: '自由加点：拥有 9 点属性点机遇',  need: 9,  get: () => (player.str || 0) + (player.vit || 0) + (player.agi || 0) },
+];
+function totalKills() { return Object.keys(player.achievements||{}).reduce((s,k)=>s+((player.achievements[k])||0),0); }
+let pullsSpentCache = 0;
+function pullsSpent() { return pullsSpentCache; }
+
+function renderJournal() {
+    const body = document.getElementById('journalBody');
+    // 图鉴区
+    let best = '<div class="j-sec"><div class="j-secHead">🗡 怪物图鉴（共 ' + totalKills() + ' 击败）</div><div class="j-bestiary">';
+    const cns = { slime:'史莱姆', wolf:'森林野狼', golem:'荒漠石像', demon:'火焰恶魔', bat:'洞穴蝙蝠' };
+    BESTIARY.forEach(b => {
+        const n = killCount(b.type);
+        best += '<div class="j-best-row"><div><span class="name">' + cns[b.type] + '</span><div class="blk">' + b.blk + '</div></div>'
+              + (n > 0 ? '<span class="cnt">' + n + ' ⚔</span>' : '<span class="blk">未遭遇</span>') + '</div>';
+    });
+    best += '</div></div>';
+    // 成就区
+    let ach = '<div class="j-sec"><div class="j-secHead">🏆 冒险成就</div><ul class="j-ach">';
+    ACHIEVEMENTS.forEach(a => {
+        const cur = a.get();
+        const done = cur >= a.need;
+        ach += '<li' + (done ? ' class="done"' : '') + '><span class="desc">' + a.desc + '</span>'
+             + (done ? '<span class="ok">✓ 达成</span>' : '<span class="prog">' + Math.min(cur, a.need) + '/' + a.need + '</span>')
+             + '</li>';
+    });
+    ach += '</ul></div>';
+    body.innerHTML = best + ach;
+}
+function updatePullsSpent() { pullsSpentCache++; }
+function openJournalPanel() {
+    closeSavePanel(); closeEqPanel(); closeGachaPanel(); closeStatPanel();
+    renderJournal();
+    document.getElementById('journalPanel').style.display = 'flex';
+}
+function closeJournalPanel() { document.getElementById('journalPanel').style.display = 'none'; }
+function toggleJournalPanel() {
+    if (document.getElementById('journalPanel').style.display === 'flex') closeJournalPanel();
+    else openJournalPanel();
+}
+// J 键呼出图鉴
+document.addEventListener('keydown', e => {
+    if (e.key.toLowerCase() === 'j' && gameStarted && !battling && !panelsOpen()) toggleJournalPanel();
+});
+document.getElementById('btnCloseJournal').addEventListener('click', closeJournalPanel);
 
 /* =========================================================
    装备面板：拖拽交互
