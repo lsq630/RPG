@@ -192,6 +192,26 @@
         60% { transform: translate(-5px, 3px); }
         80% { transform: translate(4px, -2px); }
     }
+    /* 世界Boss"整点全场动荡"演出：整幅场景强烈震荡 */
+    #gameWrap.worldTremor { animation: worldTremorShake 1.2s; }
+    @keyframes worldTremorShake {
+        0%,100% { transform: translate(0,0); }
+        10% { transform: translate(-16px, 8px); }
+        22% { transform: translate(14px, -10px); }
+        34% { transform: translate(-11px, 7px); }
+        46% { transform: translate(10px, -6px); }
+        58% { transform: translate(-8px, 5px); }
+        70% { transform: translate(6px, -3px); }
+        85% { transform: translate(-4px, 2px); }
+    }
+    #flashOverlay.tremor { animation: tremorFlash 1s; }
+    @keyframes tremorFlash {
+        0%,100% { opacity: 0; }
+        15% { opacity: .85; }
+        40% { opacity: .5; }
+        60% { opacity: .3; }
+        80% { opacity: .15; }
+    }
     #flashOverlay {
         position: absolute;
         inset: 0;
@@ -774,6 +794,32 @@
     }
     #btnResetBinds:hover, #btnCloseSettings:hover { background: #3a3460; color: #fff; }
 
+    /* ============ 世界 Boss 面板 ============ */
+    #wbPanel {
+        position: absolute; inset: 0; z-index: 53;
+        display: none; justify-content: center; align-items: center;
+        background: rgba(6,4,12,.9);
+    }
+    #wbBox {
+        width: 480px; background: #161019; border: 4px solid #a050d0;
+        padding: 16px 22px; text-align: center;
+    }
+    #wbTitle { font-size: 22px; color: #e98cff; letter-spacing: 3px; margin-bottom: 8px; }
+    #wbBody { line-height: 1.7; }
+    .wbBar { height: 18px; border: 2px solid #000; background: #2a2230; border-radius: 3px; overflow: hidden; margin: 4px 0; }
+    .wbFill { height: 100%; background: linear-gradient(#ff5f6d, #c22640); transition: width .2s; }
+    .wbFill.gold { background: linear-gradient(#ffd95e, #e0a020); }
+    .wbFill.green { background: linear-gradient(#7dffb0, #259c55); }
+    .wbBtn {
+        font-family: inherit; font-size: 14px; margin: 6px 4px; padding: 6px 16px;
+        background: #2a2040; color: #e0c6ff; border: 2px solid #a050d0; cursor: pointer;
+    }
+    .wbBtn:hover { background: #3a2a58; color: #fff; }
+    .wbBtn:disabled { opacity: .45; cursor: not-allowed; }
+    .wbLog { height: 96px; overflow-y: auto; text-align: left; font-size: 12px; color: #d8c8e8; background: rgba(0,0,0,.35); padding: 6px 8px; margin: 8px 0; border: 1px solid #3a2a48; }
+    .wbTierOk { color: #7dffb0; }
+    .wbTierNo { color: #8a6a95; }
+
     /* 成就 / 图鉴面板 */
     #journalPanel {
         position: absolute;
@@ -1132,6 +1178,14 @@
             </div>
             <div class="statCur">当前：攻击 <b id="statCurAtk">10</b> ｜ 最大HP <b id="statCurHp">100</b> ｜ 暴击 <b id="statCurCrit">10</b>%</div>
             <button id="btnCloseStat">关闭</button>
+        </div>
+    </div>
+
+    <!-- 世界Boss 祭坛面板（走近祭坛按 E 呼出）：每日刷新 / 每人一天一次 / 按伤害结算 -->
+    <div id="wbPanel">
+        <div id="wbBox">
+            <div id="wbTitle">👹 世界 Boss · 裂影巨兽</div>
+            <div id="wbBody" style="font-size:12px;color:#c8bfff;"></div>
         </div>
     </div>
 
@@ -1843,10 +1897,12 @@ function sfx(kind) {
         case 'skill':    tone(420, 0.12, 'sawtooth', 0.06, 900); break;
         case 'ult':      tone(200, 0.3, 'sawtooth', 0.08, 1200); break;
         case 'potion':   tone(660, 0.08, 'triangle', 0.05, 880); break;
+        case 'guard':    tone(300, 0.10, 'triangle', 0.05, 200); break;
         case 'coin':     tone(980, 0.07, 'square', 0.04, 1320); break;
         case 'chest':    tone(520, 0.12, 'square', 0.06, 880); tone(1040, 0.16, 'square', 0.05); break;
         case 'levelup':  tone(660, 0.1, 'square', 0.06); tone(880, 0.1, 'square', 0.06); tone(1100, 0.15, 'square', 0.06); break;
         case 'dead':     tone(300, 0.25, 'sawtooth', 0.06, 80); break;
+        case 'tremor':   tone(72, 1.0, 'sawtooth', 0.14, 38); tone(48, 1.2, 'sine', 0.10, 30); break;   // 低沉轰鸣
     }
 }
 function bindKey(act, key) { BINDS[act] = key; try { localStorage.setItem('rpg_binds', JSON.stringify(BINDS)); } catch (e) {} refreshOptUI(); applyBindHints(); }
@@ -2250,6 +2306,24 @@ function draw() {
     // ---- 2.5) 入口/出口传送门 ----
     if (isCave) drawPortal(GATE_CAVE.gx * tile + 16 - cam.x, GATE_CAVE.gy * tile + 16 - cam.y, '#3fbf3f');
     else        drawPortal(GATE_WORLD.gx * tile + 16 - cam.x, GATE_WORLD.gy * tile + 16 - cam.y, '#7f5aff');
+
+    // ---- 2.6) 世界Boss祭坛（草原固定位置）----
+    if (!isCave && currentMap === 'grass') {
+        const ax = WB_ALTAR.gx * tile - cam.x, ay = WB_ALTAR.gy * tile - cam.y;
+        ctx.fillStyle = '#3a3442'; ctx.fillRect(ax+2, ay+4, 28, 24);                  // 基座
+        ctx.fillStyle = '#543d6b'; ctx.fillRect(ax+6, ay+8, 20, 20);                  // 平台
+        ctx.fillStyle = '#a050d0'; ctx.fillRect(ax+12, ay+2, 8, 10);                  // 立柱
+        ctx.fillStyle = '#e98cff'; ctx.fillRect(ax+8, ay+0, 16, 4);                   // 上梁
+        ctx.fillStyle = '#ffd95e'; ctx.fillRect(ax+13, ay+13, 6, 5);                  // 核心宝珠
+        ctx.fillStyle = 'rgba(169,80,255,.5)';
+        ctx.beginPath(); ctx.arc(ax+16, ay+10, (20 + Math.sin(Date.now()/300)*6), 0, Math.PI*2); ctx.fill(); // 光环
+        ctx.fillStyle = '#fff'; ctx.fillRect(ax+4, ay+30, 5, 3); ctx.fillRect(ax+23, ay+30, 5, 3);
+        if (nearAltar()) {
+            ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+            ctx.fillStyle = '#ffd95e'; ctx.fillText('按' + displayKey('interact') + ' 挑战世界Boss', ax + 16, ay - 4);
+            ctx.textAlign = 'left';
+        }
+    }
 
     // ---- 3) 敌人（按类型 + 外层等级着色，越往外越凶）----
     for (const s of slimes) {
@@ -3098,6 +3172,7 @@ document.addEventListener('keydown', e => {
     if (isKey('interact', k) && !battling) {
         const c = nearChest();
         if (c) { e.preventDefault(); openChest(c); }
+        else if (nearAltar()) { e.preventDefault(); toggleWorldBossPanel(); }
     }
     // 1：饮用治愈药水（战斗/野图皆可，遇命满或药尽则返回）
     if (isKey('potion1', k)) { drinkPotion(); }
@@ -3163,6 +3238,7 @@ function gameLoop(t) {
     }
     updateFireball(dt);                 // 推进火球飞行与冷却计时
     tickDrops(dt);                      // 地面掉落宝珠：过期消失 + 路过拾取
+    checkWorldTremor();                 // 每到整点：世界Boss"全场动荡"演出
     // 冷却动画帧数递减
     if (explosion && explosion.ttl > 0) explosion.ttl--;
     if (explosion && explosion.ttl <= 0) explosion = null;
@@ -3470,7 +3546,7 @@ document.addEventListener('keydown', e => {
 });
 // 按 Escape 关闭面板
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeSavePanel(); closeEqPanel(); closeGachaPanel(); closeStatPanel(); closeJournalPanel(); closeTalentPanel(); closeShopPanel(); closeSkillPanel(); closeSettingsPanel(); }
+    if (e.key === 'Escape') { closeSavePanel(); closeEqPanel(); closeGachaPanel(); closeStatPanel(); closeJournalPanel(); closeTalentPanel(); closeShopPanel(); closeSkillPanel(); closeSettingsPanel(); closeWorldBossPanel(); }
 });
 
 /* =========================================================
@@ -3485,7 +3561,8 @@ function panelsOpen() {
         || document.getElementById('journalPanel').style.display === 'flex'
         || document.getElementById('talentPanel').style.display === 'flex'
         || document.getElementById('shopPanel').style.display === 'flex'
-        || document.getElementById('settingsPanel').style.display === 'flex';
+        || document.getElementById('settingsPanel').style.display === 'flex'
+        || document.getElementById('wbPanel').style.display === 'flex';
 }
 
 function renderEquipment() {
@@ -4244,6 +4321,277 @@ document.getElementById('optDiff').addEventListener('change', e => {
 });
 applyOptions();
 refreshOptUI();
+
+/* =========================================================
+   世界 Boss 系统：每日一只 100 万血 BOSS，全网玩家共同击破，
+   每人每天限挑战一次，奖励按个人造成的总伤害结算。
+   ========================================================= */
+const WB_HP = 1000000;
+const WB_ALTAR = { gx: 12, gy: 10 };   // 草原上的祭坛位置
+const WB_TURNS = 30;                    // 每次挑战最多 30 回合
+let wb = { date: '', dmg: 0, used: false };          // 今日累计伤害 / 是否已挑战
+let wbBattle = null;                    // 进行中的世界Boss战斗
+
+function wbToday() {
+    const d = new Date();
+    return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+}
+function loadWB() {
+    try { const s = localStorage.getItem('rpg_wb'); if (s) wb = Object.assign({ date: '', dmg: 0, used: false }, JSON.parse(s)); } catch (e) {}
+    if (wb.date !== wbToday()) wb = { date: wbToday(), dmg: 0, used: false };   // 隔日自动清零刷新
+}
+function saveWB() { try { localStorage.setItem('rpg_wb', JSON.stringify(wb)); } catch (e) {} }
+function wbSeedHash() {
+    const d = new Date();
+    const k = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    let h = (Math.imul(k, 0x9e3779b1) ^ 0x85ebca6b) >>> 0;
+    h = Math.imul(h ^ (h >>> 16), 0x85ebca6b); h ^= h >>> 13;
+    return h >>> 0;
+}
+function wbDefeatHr() { return 20 + ((wbSeedHash() >> 0) % 240) / 60; }   // 今日 20:00~23:59 被全网击破
+function wbWorldPct() {   // 世界剩余血量比例：每到整点"全场动荡"断档下挫一截
+    const n = new Date(), hr = n.getHours() + n.getMinutes() / 60, def = wbDefeatHr();
+    if (hr >= def) return 0;                                    // 已到被击破时刻
+    const total = Math.ceil(def);                               // 今日整点总段数
+    const gone = Math.min(total, Math.floor(hr) + 1);           // 已历经的整点数
+    return Math.max(0, 1 - gone / total);
+}
+function wbWorldHp() { return Math.round(WB_HP * wbWorldPct()); }
+function wbDone() { const n = new Date(); return (n.getHours() + n.getMinutes() / 60) >= wbDefeatHr(); }
+function wbBossAtk() { return 60 + ((wbSeedHash() >> 0) % 45); }          // 今日BOSS攻击力(随时间不变)
+
+/* 整点"全场动荡"演出：每到整点触发一次整幅场景震荡 + 红闪 + 轰鸣 + 世界血量下挫 */
+let wbLastTremor = '';   // 记录最近一次演出的"年月日-时"，避免同一点重复触发
+function checkWorldTremor() {
+    const n = new Date();
+    const key = n.getFullYear() + '-' + (n.getMonth() + 1) + '-' + n.getDate() + '-' + n.getHours();
+    if (wbLastTremor === key) return;
+    if (n.getMinutes() !== 0 || n.getSeconds() > 30) return;   // 仅整点后 30 秒内演出一回
+    wbLastTremor = key;
+    worldTremor();
+}
+function worldTremor() {
+    const wrap = document.getElementById('gameWrap');
+    wrap.classList.remove('worldTremor'); void wrap.offsetWidth; wrap.classList.add('worldTremor');
+    const f = document.getElementById('flashOverlay');
+    f.classList.remove('tremor'); void f.offsetWidth; f.classList.add('tremor');
+    sfx('tremor');
+    const pct = Math.round(wbWorldPct() * 100);
+    if (wbDone()) addPickup('🌋 世界震荡！！裂影巨兽应声而倒，今日已被全网击败！');
+    else addPickup('🌋 世界震荡！！裂影巨兽的咆哮席卷全场（世界已推进 ' + (100 - pct) + '%，裂影巨兽剩余 ' + wbWorldHp().toLocaleString() + ' / ' + WB_HP.toLocaleString() + ' 血）');
+}
+function nearAltar() {
+    if (currentMap !== 'grass') return false;
+    const ax = WB_ALTAR.gx * tile + 16, ay = WB_ALTAR.gy * tile + 16;
+    return Math.abs(player.x - ax) < 40 && Math.abs(player.y - ay) < 40;
+}
+// 奖励档位（按累计伤害跨档累加）
+function wbTiers() {
+    return [
+        { at: 0,      gold: 60,   pulls: 1, tag: '参与奖：金币+60 · 抽数+1' },
+        { at: 3000,   gold: 180,  pulls: 1, tag: '伤害≥3千：金币+180 · 抽数+1' },
+        { at: 12000,  gold: 400,  pulls: 2, tag: '伤害≥1.2万：金币+400 · 抽数+2' },
+        { at: 40000,  gold: 900,  pulls: 3, tag: '伤害≥4万：金币+900 · 抽数+3 · 史诗装备' },
+        { at: 120000, gold: 2400, pulls: 6, tag: '伤害≥12万：金币+2400 · 抽数+6 · 传说装备' },
+    ];
+}
+function wbCrossed() { return wbTiers().filter(t => wb.dmg >= t.at); }
+function wbAward() {
+    const crossed = wbCrossed();
+    let gold = 0, pulls = 0; const items = [];
+    crossed.forEach(t => { gold += t.gold; pulls += t.pulls; });
+    const epics = ['hero_sword', 'crystal_armor', 'sword_venom', 'armor_spikes'];
+    const legend = ['sword_legend', 'sword_star', 'armor_mithril', 'armor_void'];
+    if (crossed.some(t => t.at === 40000)) items.push(epics[(Math.random() * epics.length) | 0]);
+    if (crossed.some(t => t.at === 120000)) items.push(legend[(Math.random() * legend.length) | 0]);
+    return { gold, pulls, items };
+}
+function wbRewardSummary() {
+    const A = wbAward();
+    const parts = [];
+    parts.push('总伤害 ' + wb.dmg.toLocaleString());
+    if (A.gold) parts.push('金币 +' + A.gold);
+    if (A.pulls) parts.push('抽数 🎟+' + A.pulls);
+    A.items.forEach(it => { addItem(it); parts.push('获得装备 ' + getItemInfo(it).name); });
+    player.gold += A.gold; player.pulls += A.pulls;
+    updateHUD();
+    return parts.join(' ｜ ');
+}
+// 面板开关
+function openWorldBossPanel() {
+    closeSavePanel(); closeEqPanel(); closeGachaPanel(); closeStatPanel(); closeJournalPanel(); closeTalentPanel(); closeShopPanel(); closeSkillPanel(); closeSettingsPanel();
+    renderWorldBoss();
+    document.getElementById('wbPanel').style.display = 'flex';
+    saveWB();
+}
+function closeWorldBossPanel() {
+    if (wbBattle && !wbBattle.over) {   // 战斗中直接关闭 → 以当前伤害立即结算
+        wbBattle.over = true;
+        const s = wbRewardSummary();
+        saveWB();
+    }
+    wbBattle = null;
+    document.getElementById('wbPanel').style.display = 'none';
+}
+function toggleWorldBossPanel() {
+    if (document.getElementById('wbPanel').style.display === 'flex') closeWorldBossPanel();
+    else openWorldBossPanel();
+}
+// 渲染（大厅）
+function renderWorldBoss() {
+    const body = document.getElementById('wbBody');
+    const pct = Math.round(wbWorldPct() * 100);
+    let html = '';
+    html += '<div style="font-size:13px;color:#fff;margin-bottom:4px">🔹 裂影巨兽 🔹 ｜ HP ' +
+        wbWorldHp().toLocaleString() + ' / ' + WB_HP.toLocaleString() + '（世界已推进 <b>' + (100 - pct) + '%</b>）</div>';
+    html += '<div class="wbBar"><div class="wbFill" style="width:' + (100 - pct) + '%"></div></div>';
+    const dh = Math.floor(wbDefeatHr()), dm = Math.floor(wbDefeatHr() % 1 * 60);
+    html += '<div style="color:' + (wbDone() ? '#7dffb0' : '#ffd95e') + ';font-size:12px;margin:2px 0">'
+        + (wbDone() ? '✅ 今日已被全网击破！' : '🕐 整体进度推进中… 约 ' + dh + ':' + (dm < 10 ? '0' + dm : dm) + ' 被全网击破') + '</div>';
+    html += '<div style="margin:6px 0">你的今日伤害：<b style="color:#ffd95e">' + wb.dmg.toLocaleString() + '</b>';
+    html += ' ｜ 今日剩余挑战 <b>' + (wb.used ? 0 : 1) + '</b> 次</div>';
+    html += '<div style="text-align:left;font-size:11px;color:#8a8298;margin:6px 0">奖励按你的伤害跨档累加，战斗结束立即结算：</div>';
+    wbTiers().forEach(t => {
+        const ok = wb.dmg >= t.at;
+        html += '<div class="' + (ok ? 'wbTierOk' : 'wbTierNo') + '" style="font-size:11px">' + (ok ? '✓ ' : '○ ') + t.tag + '</div>';
+    });
+    if (wb.used) {
+        html += '<button class="wbBtn" id="wbResumeBtn">🔁 查看今日已结算奖励</button>';
+    } else {
+        html += '<button class="wbBtn" id="wbStartBtn">⚔ 开始挑战</button>';
+    }
+    html += '<button class="wbBtn" id="wbCloseBtn">关闭</button>';
+    body.innerHTML = html;
+    document.getElementById('wbCloseBtn').addEventListener('click', closeWorldBossPanel);
+    const st = document.getElementById('wbStartBtn');
+    if (st) st.addEventListener('click', () => { wb.used = true; wb.dmg = 0; saveWB(); startWbBattle(); });
+    const rw = document.getElementById('wbResumeBtn');
+    if (rw) rw.addEventListener('click', () => { body.innerHTML = '<div style="color:#ffd95e">今日奖励已在挑战结束时发放。</div><button class="wbBtn" id="wbCloseBtn3">关闭</button>'; document.getElementById('wbCloseBtn3').addEventListener('click', closeWorldBossPanel); });
+}
+/* 开始一次世界Boss挑战（自包含回合战） */
+function startWbBattle() {
+    wbBattle = {
+        turn: 1, defending: false, log: '',
+        bossHp: wbWorldHp(), energy: 0, over: false
+    };
+    renderWbBattle();
+}
+function wbLogLn(txt) {
+    if (!wbBattle) return;
+    wbBattle.log += '<div>' + txt + '</div>';
+    const el = document.getElementById('wbLog');
+    if (el) { el.innerHTML = wbBattle.log; el.scrollTop = el.scrollHeight; }
+}
+function renderWbBattle() {
+    const body = document.getElementById('wbBody');
+    if (!wbBattle) return renderWorldBoss();
+    const b = wbBattle;
+    const pct = b.bossHp / WB_HP * 100;
+    let html = '';
+    html += '<div style="font-size:12px;color:#e98cff">👹 裂影巨兽 ｜ 回合 ' + b.turn + ' / ' + WB_TURNS + '</div>';
+    html += '<div class="wbBar"><div class="wbFill" style="width:' + Math.max(0, pct).toFixed(1) + '%"></div></div>';
+    html += '<div style="font-size:11px;color:#9a8ea8">世界剩余 ' + b.bossHp.toLocaleString() + ' / ' + WB_HP.toLocaleString() + '</div>';
+    html += '<div style="margin:4px 0">❤️ ' + player.hp + '/' + player.maxHp + ' 　<font color="#7fd2ff">💧 ' + player.mp + '/' + player.maxMp + '</font> 　⚡大招 ' + b.energy + '/100</div>';
+    html += '<div>你的本日伤害：<b style="color:#ffd95e">' + wb.dmg.toLocaleString() + '</b></div>';
+    html += '<div class="wbLog" id="wbLog"></div>';
+    html += '<button class="wbBtn" id="wbaAtk">🗡 普攻</button>'
+        + '<button class="wbBtn" id="wbaDef">🛡 防御</button>'
+        + '<button class="wbBtn" id="wbaFire">🔥 火球(' + FIRE_COST + 'MP)</button>'
+        + '<button class="wbBtn" id="wbaUlt">⚡ 大招</button>'
+        + '<button class="wbBtn" id="wbaPotion">🍶 药水</button>'
+        + '<button class="wbBtn" id="wbaEnd">🏳 结束挑战</button>';
+    body.innerHTML = html;
+    ['wbaAtk', 'wbaDef', 'wbaFire', 'wbaUlt', 'wbaPotion', 'wbaEnd'].forEach(id =>
+        document.getElementById(id).addEventListener('click', onWbAction));
+    wbLogLn('📜 挑战开始！' + WB_TURNS + ' 回合内尽可能多打伤害。');
+    wbLogLn('👹 BOSS 咆哮着逼近（攻击力 ' + wbBossAtk() + '）。');
+    const ult = document.getElementById('wbaUlt'); if (ult) ult.disabled = b.energy < 100;
+}
+function onWbAction(ev) {
+    if (!wbBattle || wbBattle.over) return;
+    const b = wbBattle;
+    const act = ev.currentTarget.id;
+    let dealt = 0, logTxt = '';
+    if (act === 'wbaAtk') {
+        const crit = Math.random() < playerCrit();
+        let dmg = Math.round((effAtk() + Math.floor(Math.random() * 6)) * talMult('heavy', 0.06));
+        if (crit) dmg = Math.round(dmg * 1.6);
+        if (dmg < 1) dmg = 1;
+        b.energy = Math.min(100, b.energy + Math.round(25 * talMult('surge', 0.15)));
+        dealt = dmg; sfx('hit');
+        logTxt = '你挥剑造成 ' + dmg + (crit ? '（暴击！）' : '') + ' 伤害';
+    } else if (act === 'wbaDef') {
+        b.defending = true; sfx('guard');
+        logTxt = '你摆出防御姿态（本回合减伤 50%）。';
+    } else if (act === 'wbaFire') {
+        if (player.mp < FIRE_COST) { wbLogLn('🔥 MP 不足！'); return; }
+        player.mp -= FIRE_COST;
+        let dmg = Math.round((effAtk() * 1.5 + 12) * talMult('heavy', 0.06));
+        dealt = dmg; sfx('skill');
+        logTxt = '🔥 火球命中，造成 ' + dmg + ' 伤害';
+    } else if (act === 'wbaUlt') {
+        if (b.energy < 100) { wbLogLn('⚡ 能量不足！'); return; }
+        b.energy = 0;
+        let dmg = Math.round(effAtk() * 5 * talMult('heavy', 0.06));
+        dealt = dmg; sfx('ult'); juiceCrit();
+        logTxt = '⚡ 你释放大招，造成 ' + dmg + ' 巨额伤害！';
+    } else if (act === 'wbaPotion') {
+        if (player.potions <= 0) { wbLogLn('🍶 没有治愈药水了！'); return; }
+        player.potions--;
+        const heal = Math.max(1, Math.round(player.maxHp * 0.6 * talMult('alchemy', 0.15)));
+        player.hp = Math.min(player.maxHp, player.hp + heal);
+        sfx('potion'); updateHUD();
+        wbLogLn('🍶 你饮用药水，回复 ' + heal + ' HP。');
+        wbBossTurn(); return;
+    } else if (act === 'wbaEnd') {
+        finishWbBattle(true); return;
+    }
+    if (dealt > 0) {
+        b.bossHp = Math.max(0, b.bossHp - dealt);
+        wb.dmg += dealt;
+        wbLogLn(logTxt);
+        if (b.bossHp <= 0) { wbLogLn('🎉 你亲手击破了世界 BOSS 的今日血量！'); finishWbBattle(false); return; }
+    } else { wbLogLn(logTxt); }
+    updateHUD();
+    wbBossTurn();
+}
+function wbBossTurn() {
+    if (!wbBattle || wbBattle.over) return;
+    const b = wbBattle;
+    if (wbDone()) b.bossHp = 0;
+    if (b.bossHp <= 0) { wbLogLn('🎉 世界BOSS今日已被全体击破，战斗结束！'); finishWbBattle(false); return; }
+    let dmg = Math.max(1, Math.round(wbBossAtk() * (b.defending ? 0.5 : 1) * (Math.random() * 0.3 + 0.85)));
+    b.defending = false;
+    player.hp = Math.max(0, player.hp - dmg);
+    b.energy = Math.min(100, b.energy + 10);
+    sfx('hurt');
+    wbLogLn('👹 BOSS 反击，对你造成 ' + dmg + ' 伤害！');
+    if (player.hp <= 0) { wbLogLn('💀 你倒下了…今日挑战结束。'); finishWbBattle(false); return; }
+    b.turn++;
+    if (b.turn > WB_TURNS) { finishWbBattle(false); return; }
+    updateHUD();
+    const ult = document.getElementById('wbaUlt'); if (ult) ult.disabled = b.energy < 100;
+}
+function finishWbBattle(manual) {
+    if (!wbBattle) return;
+    wbBattle.over = true;
+    const summary = wbRewardSummary();
+    saveWB();
+    const body = document.getElementById('wbBody');
+    body.innerHTML = '<div style="color:#ffd95e;font-size:16px">🎁 今日世界Boss结算</div>'
+        + '<div style="font-size:12px;margin:8px 0">' + summary + '</div>'
+        + '<div style="font-size:11px;color:#8a8298">按你今天造成的总伤害结算；奖励已自动发放到背包/资源栏。明天会刷新新的 BOSS。</div>'
+        + '<button class="wbBtn" id="wbCloseBtn2">关闭</button>';
+    document.getElementById('wbCloseBtn2').addEventListener('click', () => {
+        if (player.hp <= 0) { player.hp = 1; updateHUD(); }   // 被世界Boss打倒并不重置存档，自行喝药恢复
+        closeWorldBossPanel();
+    });
+}
+function getItemInfo(itemId) {
+    const items = { iron_sword: { name: '铁剑' }, leather_armor: { name: '皮甲' }, hero_sword: { name: '勇者之剑' }, crystal_armor: { name: '水晶战甲' }, sword_venom: { name: '剧毒之刃' }, armor_spikes: { name: '荆棘之甲' }, sword_legend: { name: '传说·光暗之刃' }, sword_star: { name: '星河之刃' }, armor_mithril: { name: '秘银战铠' }, armor_void: { name: '虚空重甲' } };
+    return items[itemId] || { name: itemId };
+}
+loadWB();
 
 /* =========================================================
    装备面板：拖拽交互
