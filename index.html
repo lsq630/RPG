@@ -1826,6 +1826,7 @@ function keyFor(a) { return BINDS[a] != null ? BINDS[a] : KEY_DEFAULTS[a]; }
 function isKey(a, k) { return keyFor(a) === (k == null ? '' : String(k).toLowerCase()); }
 function displayKey(a) {
     const k = keyFor(a);
+    if (k == null) return '·';   // 未绑定动作：显示占位，避免中断启动流程
     if (k === ' ') return '空格';
     if (k === 'escape') return 'Esc';
     if (k === 'shift') return 'Shift';
@@ -1912,8 +1913,7 @@ function applyBindHints() {
     document.querySelectorAll('.key[data-act]').forEach(el => {
         const a = el.dataset.act;
         if (a === 'move') {
-            el.textContent = [keyFor('up'), keyFor('down'), keyFor('left'), keyFor('right')]
-                .map(displayKey).join(' ');
+            el.textContent = ['up', 'down', 'left', 'right'].map(displayKey).join(' ');
         } else {
             el.textContent = displayKey(a);
         }
